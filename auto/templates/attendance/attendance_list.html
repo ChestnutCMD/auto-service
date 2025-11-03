@@ -1,0 +1,288 @@
+<!-- templates/services/home.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Профессиональный автосервис | Ремонт и обслуживание</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-car text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">AutoExpert</h1>
+                        <p class="text-xs text-gray-500">Профессиональный сервис</p>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#services" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Услуги</a>
+                    <a href="#advantages" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Преимущества</a>
+                    <a href="#contacts" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Контакты</a>
+                    <button class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-all transform hover:-translate-y-0.5 shadow-lg">
+                        <i class="fas fa-phone mr-2"></i>Записаться
+                    </button>
+                </div>
+
+                <button class="md:hidden text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative py-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/10"></div>
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
+                    <i class="fas fa-star"></i>
+                    <span class="text-sm font-medium">Более 10 лет на рынке</span>
+                </div>
+
+                <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                    Профессиональный
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">ремонт</span>
+                    вашего автомобиля
+                </h1>
+
+                <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                    Полный спектр услуг по диагностике, ремонту и обслуживанию автомобилей.
+                    Работаем с любыми марками и моделями.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition-all transform hover:-translate-y-1 shadow-lg hover:shadow-xl font-semibold text-lg flex items-center">
+                        <i class="fas fa-tools mr-3"></i>Посмотреть услуги
+                    </button>
+                    <button class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-all font-semibold text-lg flex items-center">
+                        <i class="fas fa-phone mr-3"></i>+7 (999) 123-45-67
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating elements -->
+        <div class="absolute top-20 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+        <div class="absolute bottom-20 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-30 animate-bounce"></div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Наши услуги</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                    Комплексный подход к ремонту и обслуживанию вашего автомобиля
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for service in services %}
+                <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
+                    <!-- Image -->
+                    <div class="h-48 overflow-hidden relative">
+                        {% if service.photos.all %}
+                            <img src="{{ service.photos.first.photo.url }}"
+                                 alt="{{ service.tittle }}"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                                <i class="fas fa-tools text-white text-5xl"></i>
+                            </div>
+                        {% endif %}
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-blue-600 px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+                            {{ service.price }} ₽
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                            {{ service.tittle }}
+                        </h3>
+
+                        <p class="text-gray-600 mb-4 leading-relaxed line-clamp-3">
+                            {{ service.description }}
+                        </p>
+
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center space-x-2 text-gray-500">
+                                <i class="fas fa-clock"></i>
+                                <span class="text-sm">{{ service.get_duration_display }}</span>
+                            </div>
+                            <div class="flex items-center space-x-1 text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:-translate-y-0.5 shadow-lg hover:shadow-xl font-semibold flex items-center justify-center group/btn">
+                            <i class="fas fa-calendar-check mr-2 group-hover/btn:scale-110 transition-transform"></i>
+                            Записаться онлайн
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-3 text-center py-12">
+                    <div class="max-w-md mx-auto">
+                        <i class="fas fa-tools text-gray-300 text-6xl mb-4"></i>
+                        <h3 class="text-2xl font-bold text-gray-400 mb-2">Услуги временно недоступны</h3>
+                        <p class="text-gray-500">Мы обновляем список услуг. Пожалуйста, зайдите позже.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section id="advantages" class="py-20 bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Почему выбирают нас?</h2>
+                <p class="text-xl text-blue-200 max-w-2xl mx-auto">
+                    Мы заботимся о вашем автомобиле как о своем собственном
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <i class="fas fa-shield-alt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Гарантия качества</h3>
+                    <p class="text-blue-200">Гарантия на все виды работ до 2 лет</p>
+                </div>
+
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <i class="fas fa-bolt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Скорость</h3>
+                    <p class="text-blue-200">Диагностика за 30 минут, большинство ремонтов за 1 день</p>
+                </div>
+
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <i class="fas fa-award text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Опыт</h3>
+                    <p class="text-blue-200">Более 10 лет опыта работы с автомобилями</p>
+                </div>
+
+                <div class="text-center group">
+                    <div class="w-20 h-20 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                        <i class="fas fa-headset text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Поддержка 24/7</h3>
+                    <p class="text-blue-200">Круглосуточная техподдержка и консультации</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold mb-6">Готовы записаться на обслуживание?</h2>
+            <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                Оставьте заявку и мы свяжемся с вами в течение 15 минут для уточнения деталей
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button class="bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-all transform hover:-translate-y-1 shadow-2xl font-semibold text-lg flex items-center">
+                    <i class="fas fa-calendar-plus mr-3"></i>Онлайн запись
+                </button>
+                <button class="border-2 border-white text-white px-8 py-4 rounded-xl hover:bg-white hover:text-blue-600 transition-all font-semibold text-lg flex items-center">
+                    <i class="fas fa-phone mr-3"></i>Позвонить сейчас
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacts" class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                            <i class="fas fa-car text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">AutoExpert</h3>
+                    </div>
+                    <p class="text-gray-400">Профессиональный автосервис с 2014 года</p>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Контакты</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p><i class="fas fa-phone mr-2"></i>+7 (999) 123-45-67</p>
+                        <p><i class="fas fa-envelope mr-2"></i>info@autoexpert.ru</p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>г. Москва, ул. Автомобильная, 15</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Время работы</h4>
+                    <div class="space-y-2 text-gray-400">
+                        <p>Пн-Пт: 9:00 - 20:00</p>
+                        <p>Сб: 10:00 - 18:00</p>
+                        <p>Вс: 10:00 - 16:00</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Соцсети</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center hover:bg-green-600 transition-colors">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 AutoExpert. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .line-clamp-3 {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .font-inter {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</body>
+</html>
