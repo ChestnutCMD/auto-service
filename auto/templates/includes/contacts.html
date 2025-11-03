@@ -1,0 +1,46 @@
+<!-- templates/includes/contacts.html -->
+<section id="contacts" class="section bg-gray-900 text-white">
+    <div class="container">
+        <div class="section-header">
+            <h2 style="color: white;">Контакты</h2>
+            <p class="section-description" style="color: #d1d5db;">
+                Свяжитесь с нами удобным для вас способом
+            </p>
+        </div>
+
+        <div class="contacts-grid">
+            <!-- Контакты из базы данных -->
+            {% for contact in contacts %}
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="{{ contact.icon }}"></i>
+                </div>
+                <div class="contact-info">
+                    <h3>{{ contact.name }}</h3>
+                    <p>{{ contact.value }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <!-- Если контактов нет в БД, показываем заглушку -->
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="contact-info">
+                    <h3>Адрес</h3>
+                    <p>г. Москва, ул. Автомобильная, д. 15</p>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div class="contact-info">
+                    <h3>Телефон</h3>
+                    <p>+7 (999) 123-45-67</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

@@ -15,6 +15,16 @@ class Attendance(models.Model):
     def __str__(self):
         return self.tittle
 
+    def get_duration_display(self):
+        """Красивое отображение длительности"""
+        total_seconds = int(self.duration.total_seconds())
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+
+        if hours > 0:
+            return f"{hours}ч {minutes}м"
+        return f"{minutes} мин"
+
 
 def upload_attendance_photo(instance, filename):
     return f'media/images/attendance_photo/{instance.attendance.id}/{filename}'

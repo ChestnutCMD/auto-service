@@ -1,0 +1,49 @@
+<!-- templates/includes/header.html -->
+<nav>
+    <div class="container">
+        <div class="nav-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 700; font-size: 1.25rem;">AutoExpert</div>
+                    <div style="font-size: 0.75rem; color: #6b7280;">Профессиональный сервис</div>
+                </div>
+            </div>
+
+            <div class="nav-links">
+                <a href="#services" class="nav-link">Услуги</a>
+                <a href="#advantages" class="nav-link">Преимущества</a>
+                <a href="#contacts" class="nav-link" onclick="scrollToContacts()">Контакты</a>
+
+                {% if main_phone %}
+                <a href="tel:{{ main_phone.value }}" class="btn-primary">
+                    <i class="fas fa-phone"></i>
+                    {% if main_phone.formatted_value %}
+                        {{ main_phone.formatted_value }}
+                    {% else %}
+                        {{ main_phone.value }}
+                    {% endif %}
+                </a>
+                {% else %}
+                <a href="tel:+79991234567" class="btn-primary">
+                    <i class="fas fa-phone"></i> +7 (999) 123-45-67
+                </a>
+                {% endif %}
+            </div>
+
+            <button class="md:hidden" style="display: block; color: #374151; font-size: 1.25rem; background: none; border: none; cursor: pointer;">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<script>
+function scrollToContacts() {
+    document.getElementById('contacts').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+</script>

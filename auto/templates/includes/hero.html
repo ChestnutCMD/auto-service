@@ -1,0 +1,133 @@
+<!-- templates/includes/hero.html -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="badge">
+                <i class="fas fa-star"></i>
+                <span>Более 10 лет на рынке</span>
+            </div>
+
+            <h1>
+                Профессиональный
+                <span class="gradient-text">ремонт</span>
+                вашего автомобиля
+            </h1>
+
+            <p class="hero-description">
+                Полный спектр услуг по диагностике, ремонту и обслуживанию автомобилей.
+                Работаем с любыми марками и моделями.
+            </p>
+
+            <div class="btn-group">
+                <a href="#services" class="btn-primary" style="padding: 1rem 2rem; font-size: 1.125rem; text-decoration: none;">
+                    <i class="fas fa-tools"></i> Посмотреть услуги
+                </a>
+
+                {% if main_phone %}
+                <a href="tel:{{ main_phone.value }}" class="btn-secondary">
+                    <i class="fas fa-phone"></i>
+                    {% if main_phone.formatted_value %}
+                        {{ main_phone.formatted_value }}
+                    {% else %}
+                        {{ main_phone.value }}
+                    {% endif %}
+                </a>
+                {% else %}
+                <a href="tel:+79991234567" class="btn-secondary">
+                    <i class="fas fa-phone"></i> +7 (999) 123-45-67
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Декоративные элементы -->
+    <div class="absolute top-20 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
+    <div class="absolute bottom-20 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-30 animate-bounce"></div>
+</section>
+
+<style>
+.absolute {
+    position: absolute;
+}
+
+.top-20 {
+    top: 5rem;
+}
+
+.left-10 {
+    left: 2.5rem;
+}
+
+.w-20 {
+    width: 5rem;
+}
+
+.h-20 {
+    height: 5rem;
+}
+
+.bg-blue-200 {
+    background-color: #bfdbfe;
+}
+
+.rounded-full {
+    border-radius: 9999px;
+}
+
+.opacity-20 {
+    opacity: 0.2;
+}
+
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.bottom-20 {
+    bottom: 5rem;
+}
+
+.right-10 {
+    right: 2.5rem;
+}
+
+.w-16 {
+    width: 4rem;
+}
+
+.h-16 {
+    height: 4rem;
+}
+
+.bg-purple-200 {
+    background-color: #e9d5ff;
+}
+
+.opacity-30 {
+    opacity: 0.3;
+}
+
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(-25%);
+        animation-timing-function: cubic-bezier(0.8,0,1,1);
+    }
+    50% {
+        transform: none;
+        animation-timing-function: cubic-bezier(0,0,0.2,1);
+    }
+}
+</style>

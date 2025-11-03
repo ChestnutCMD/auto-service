@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}🚗 Автосервис - Главная{% endblock %}
+
+{% block content %}
+    {% include 'includes/hero.html' %}
+    {% include 'includes/services.html' %}
+    
+    <!-- Секция преимуществ -->
+    <section id="advantages" class="section bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+        <div class="container">
+            <div class="section-header">
+                <h2>Почему выбирают нас?</h2>
+                <p class="section-description" style="color: #d1d5db;">
+                    Мы заботимся о вашем автомобиле как о своем собственном
+                </p>
+            </div>
+            
+            <div class="advantages-grid">
+                <!-- Добавьте преимущества здесь -->
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+// Функция для плавной прокрутки к контактам
+function scrollToContacts() {
+    document.getElementById('contacts').scrollIntoView({
+        behavior: 'smooth'
+    });
+}
+
+// Функция для переключения фотографий
+function changePhoto(serviceId, direction) {
+    const serviceElement = document.querySelector(`.service-photo[data-service-id="${serviceId}"]`);
+    if (!serviceElement) return;
+    
+    const currentIndex = parseInt(serviceElement.getAttribute('data-photo-index'));
+    const photoCounter = serviceElement.closest('.service-image').querySelector('.photo-counter');
+    
+    if (!photoCounter) return;
+    
+    const totalPhotos = parseInt(photoCounter.querySelector('.total-photos').textContent);
+    let newIndex = currentIndex + direction;
+    
+    if (newIndex < 0) newIndex = totalPhotos - 1;
+    if (newIndex >= totalPhotos) newIndex = 0;
+    
+    serviceElement.style.opacity = '0.7';
+    serviceElement.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+        serviceElement.style.opacity = '1';
+        serviceElement.style.transform = 'scale(1)';
+        serviceElement.setAttribute('data-photo-index', newIndex);
+        
+        const currentPhoto = photoCounter.querySelector('.current-photo');
+        currentPhoto.textContent = newIndex + 1;
+    }, 200);
+}
+{% endblock %}

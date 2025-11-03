@@ -1,0 +1,85 @@
+<section id="services" class="section section-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Наши услуги</h2>
+            <p class="section-description">
+                Комплексный подход к ремонту и обслуживанию вашего автомобиля
+            </p>
+        </div>
+
+        <div class="services-grid">
+            {% for service in services %}
+            <div class="service-card">
+                <div class="service-image">
+                    {% if service.photos.all %}
+                        <img src="{{ service.photos.first.photo.url }}"
+                             alt="{{ service.tittle }}"
+                             class="service-photo"
+                             data-service-id="{{ service.id }}"
+                             data-photo-index="0">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);">
+                            <i class="fas fa-tools" style="color: white; font-size: 3rem;"></i>
+                        </div>
+                    {% endif %}
+
+                    <div class="service-price">{{ service.price }} ₽</div>
+
+                    {% if service.photos.count > 1 %}
+                    <div class="photo-nav">
+                        <button class="photo-nav-btn prev-btn"
+                                onclick="changePhoto('{{ service.id }}', -1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="photo-nav-btn next-btn"
+                                onclick="changePhoto('{{ service.id }}', 1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="photo-counter">
+                        <span class="current-photo">1</span>/<span class="total-photos">{{ service.photos.count }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="service-content">
+                    <h3 class="service-title">{{ service.tittle }}</h3>
+
+                    <p class="service-description">
+                        {{ service.description }}
+                    </p>
+
+                    <div class="service-meta">
+                        <div class="service-duration">
+                            <i class="fas fa-clock"></i>
+                            <span>
+                                {% if service.get_duration_display %}
+                                    {{ service.get_duration_display }}
+                                {% else %}
+                                    {{ service.duration }}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; justify-content: center;">
+                        <i class="fas fa-calendar-check"></i> Записаться онлайн
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-services">
+                <div class="no-services-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: #9ca3af; margin-bottom: 0.5rem;">
+                    Услуги временно недоступны
+                </h3>
+                <p style="color: #6b7280;">
+                    Мы обновляем список услуг. Пожалуйста, зайдите позже.
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
