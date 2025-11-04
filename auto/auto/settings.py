@@ -64,7 +64,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'autoservice_db'),
         'USER': os.getenv('POSTGRES_USER', 'autoservice_user'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'autoservice_password'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'HOST': os.getenv('POSTGRES_HOST', 'postgres'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
         'CONN_MAX_AGE': 600,
         'OPTIONS': {

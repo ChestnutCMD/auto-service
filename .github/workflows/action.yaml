@@ -23,11 +23,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/auto-service:latest
-            ${{ secrets.DOCKER_USERNAME }}/auto-service:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ secrets.DOCKER_USERNAME }}/auto-service:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -46,10 +42,17 @@ jobs:
               image: ${{ secrets.DOCKER_USERNAME }}/auto-service:latest
               restart: always
               container_name: django_app
-              env_file:
-                - .env
               environment:
-                DB_HOST: postgres
+                - DEBUG=0
+                - SECRET_KEY=${{ secrets.SECRET_KEY }}
+                - DB_NAME=${{ secrets.POSTGRES_DB }}
+                - DB_USER=${{ secrets.POSTGRES_USER }}
+                - DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+                - DB_HOST=postgres
+                - DB_PORT=5432
+                - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.HOST }}
+                - TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+                - TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
               volumes:
                 - ./media:/app/media
                 - ./static:/app/static
@@ -57,8 +60,6 @@ jobs:
                 - "8000:8000"
               depends_on:
                 postgres:
-                  condition: service_healthy
-                redis:
                   condition: service_healthy
 
             postgres:
@@ -76,32 +77,8 @@ jobs:
                 timeout: 5s
                 retries: 5
 
-            redis:
-              image: redis:7-alpine
-              container_name: autoservice_redis
-              healthcheck:
-                test: ["CMD", "redis-cli", "ping"]
-                interval: 10s
-                timeout: 5s
-                retries: 5
-
           volumes:
             postgres_data:
-          EOF
-
-      - name: Create .env file
-        run: |
-          cat > .env << EOF
-          DEBUG=0
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
-          DB_NAME=${{ secrets.POSTGRES_DB }}
-          DB_USER=${{ secrets.POSTGRES_USER }}
-          DB_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          DB_HOST=postgres
-          DB_PORT=5432
-          ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,${{ secrets.HOST }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
           EOF
 
       - name: Copy files to server
@@ -110,43 +87,31 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          source: "docker-compose.yaml,.env"
+          source: "docker-compose.yaml"
           target: "/home/${{ secrets.USERNAME }}/app"
-          strip_components: 0
 
-      - name: Deploy app on server
+      - name: Deploy and debug
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            echo "Current directory: $(pwd)"
-            echo "Listing files in app directory:"
-            ls -la /home/${{ secrets.USERNAME }}/app/
-            
             cd /home/${{ secrets.USERNAME }}/app
             
-            echo "Checking if docker-compose.yaml exists:"
-            ls -la docker-compose.yaml
+            # Останавливаем старые контейнеры
+            docker-compose down || true
             
-            echo "File content:"
-            cat docker-compose.yaml
-            
-            # Создаем необходимые директории
+            # Создаем директории
             mkdir -p media static
             
-            # Обновляем образ
-            docker pull ${{ secrets.DOCKER_USERNAME }}/auto-service:latest
-            
-            # Запускаем приложение
-            docker-compose down || true
+            # Запускаем
             docker-compose up -d
             
-            # Очистка старых образов
-            docker image prune -f
+            # Ждем и проверяем логи
+            sleep 10
+            echo "=== Django logs ==="
+            docker logs django_app --tail 50
             
-            # Проверяем что контейнеры запущены
-            echo "Running containers:"
-            docker ps -a
-            echo "Deployment completed successfully!"
+            echo "=== PostgreSQL logs ==="
+            docker logs autoservice_postgres --tail 20
