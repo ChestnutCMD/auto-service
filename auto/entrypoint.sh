@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e  # Остановить при ошибке
+set -e
 
 echo "=== Starting entrypoint script ==="
 
@@ -38,9 +38,6 @@ try:
     conn.close()
 except OperationalError as e:
     print(f"❌ Database connection failed: {e}")
-    print(f"   DB_HOST: {os.environ.get('DB_HOST')}")
-    print(f"   DB_NAME: {os.environ.get('DB_NAME')}")
-    print(f"   DB_USER: {os.environ.get('DB_USER')}")
     exit(1)
 EOF
 
@@ -48,9 +45,9 @@ EOF
 echo "Applying migrations..."
 python manage.py migrate --noinput
 
-# Сбор статики (без подтверждения)
+# Сбор статики
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
-echo "=== Entrypoint script completed ==="
+echo "=== Starting Gunicorn ==="
 exec "$@"
