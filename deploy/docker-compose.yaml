@@ -6,7 +6,7 @@ services:
     restart: always
     container_name: django
     env_file:
-      - ../.env
+      - ./.env
     environment:
       DB_HOST: postgres
     volumes:
