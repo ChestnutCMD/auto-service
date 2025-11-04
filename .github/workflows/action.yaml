@@ -15,8 +15,8 @@ jobs:
 
       - name: Docker build and push
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/rental-guru:$GITHUB_REF_NAME-$GITHUB_RUN_ID .
-          docker push ${{ secrets.DOCKER_USERNAME }}/rental-guru:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/auto-service:$GITHUB_REF_NAME-$GITHUB_RUN_ID .
+          docker push ${{ secrets.DOCKER_USERNAME }}/auto-service:$GITHUB_REF_NAME-$GITHUB_RUN_ID
 
   deploy:
     runs-on: ubuntu-latest
