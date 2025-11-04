@@ -12,7 +12,7 @@ services:
     volumes:
       - ./media:/app/media
       - ./.env:/app/.env
-
+      - ./static:/app/static
     depends_on:
       postgres:
         condition: service_healthy
