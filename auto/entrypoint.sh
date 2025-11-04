@@ -34,10 +34,13 @@ try:
         host=os.environ['DB_HOST'],
         port=os.environ['DB_PORT']
     )
-    print("Database connection successful!")
+    print("✅ Database connection successful!")
     conn.close()
 except OperationalError as e:
-    print(f"Database connection failed: {e}")
+    print(f"❌ Database connection failed: {e}")
+    print(f"   DB_HOST: {os.environ.get('DB_HOST')}")
+    print(f"   DB_NAME: {os.environ.get('DB_NAME')}")
+    print(f"   DB_USER: {os.environ.get('DB_USER')}")
     exit(1)
 EOF
 
@@ -45,7 +48,7 @@ EOF
 echo "Applying migrations..."
 python manage.py migrate --noinput
 
-# Сбор статики
+# Сбор статики (без подтверждения)
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
