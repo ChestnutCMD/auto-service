@@ -4,7 +4,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-COPY /RentalGuru .
+COPY /auto .
 ENTRYPOINT ["bash", "entrypoint.sh"]
 CMD ["bash", "start.sh"]
 EXPOSE 8000
