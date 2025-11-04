@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  api:
+    image: $DOCKER_USERNAME/auto-service:$GITHUB_REF_NAME-$GITHUB_RUN_ID
+    restart: always
+    container_name: django
+    env_file:
+      - ../.env
+    environment:
+      DB_HOST: postgres
+    volumes:
+      - ./media:/app/media
+      - ./.env:/app/.env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
   postgres:
     image: postgres:15
     container_name: autoservice_postgres

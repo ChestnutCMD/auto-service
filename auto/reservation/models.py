@@ -45,6 +45,24 @@ class Reservations(models.Model):
         if overlapping.exists():
             raise ValidationError('Это время уже занято')
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            self.send_creation_notification()
+
+    def send_creation_notification(self):
+        """
+        Отправляет уведомление о создании новой заявки
+        """
+        try:
+            from .telegram_utils import send_telegram_notification
+            send_telegram_notification(self)
+        except Exception as e:
+            # Логируем ошибку, но не прерываем сохранение
+            print(f"Failed to send Telegram notification: {e}")
+
 
 class WorkSchedule(models.Model):
     DAYS_OF_WEEK = (

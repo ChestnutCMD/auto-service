@@ -48,16 +48,20 @@ def home(request):
                     else:
                         messages.error(request, 'Выбранное время вне рабочего графика')
                 else:
+                    # Сохраняем бронирование (уведомление отправится автоматически через model.save())
                     reservation.save()
+
+                    success_message = 'Заявка на бронирование успешно создана! Мы свяжемся с вами для подтверждения.'
+
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                         return JsonResponse({
                             'success': True,
-                            'message': 'Заявка на бронирование успешно создана! Мы свяжемся с вами для подтверждения.'
+                            'message': success_message
                         })
                     else:
-                        messages.success(request,
-                                         'Заявка на бронирование успешно создана! Мы свяжемся с вами для подтверждения.')
+                        messages.success(request, success_message)
                         return redirect('home')
+
             except ValidationError as e:
                 error_message = str(e)
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
