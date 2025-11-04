@@ -1,0 +1,67 @@
+<!-- Модальное окно бронирования -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="bookingModalTitle">
+                <i class="fas fa-calendar-check"></i> Запись на услугу
+            </h3>
+            <button type="button" class="modal-close" onclick="closeBookingModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="bookingForm" method="post" class="modal-body">
+            {% csrf_token %}
+            <input type="hidden" name="attendance" id="id_attendance">
+
+            <div class="form-group">
+                <label for="id_name" class="form-label">
+                    <i class="fas fa-user"></i> Ваше имя *
+                </label>
+                <input type="text" name="name" id="id_name" required
+                       placeholder="Введите ваше имя"
+                       class="form-input">
+                <div class="form-error" id="name_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_phone" class="form-label">
+                    <i class="fas fa-phone"></i> Телефон *
+                </label>
+                <input type="tel" name="phone" id="id_phone" required
+                       placeholder="+7 (999) 999-99-99"
+                       class="form-input">
+                <div class="form-error" id="phone_error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_communication" class="form-label">
+                    <i class="fas fa-comments"></i> Способ связи
+                </label>
+                <select name="communication" id="id_communication" class="form-input">
+                    <option value="phone">Телефон</option>
+                    <option value="whatsapp">Ватсап</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="id_time" class="form-label">
+                    <i class="fas fa-calendar-alt"></i> Желаемое время *
+                </label>
+                <input type="datetime-local" name="time" id="id_time" required
+                       class="form-input">
+                <div class="form-error" id="time_error"></div>
+                <small class="form-hint">Выберите удобную дату и время</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeBookingModal()">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Записаться
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

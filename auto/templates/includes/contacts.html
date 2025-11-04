@@ -9,7 +9,6 @@
         </div>
 
         <div class="contacts-grid">
-            <!-- Контакты из базы данных -->
             {% for contact in contacts %}
             <div class="contact-item">
                 <div class="contact-icon">
@@ -17,18 +16,20 @@
                 </div>
                 <div class="contact-info">
                     <h3>{{ contact.name }}</h3>
-                    <p>{{ contact.value }}</p>
+                    <p class="contact-value" data-icon="{{ contact.icon }}" data-value="{{ contact.value }}">
+                        {{ contact.value }}
+                    </p>
                 </div>
             </div>
             {% empty %}
-            <!-- Если контактов нет в БД, показываем заглушку -->
+            <!-- Заглушка если нет контактов в БД -->
             <div class="contact-item">
                 <div class="contact-icon">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <div class="contact-info">
                     <h3>Адрес</h3>
-                    <p>г. Москва, ул. Автомобильная, д. 15</p>
+                    <p>{{ company_info.DEFAULT_ADDRESS }}</p>
                 </div>
             </div>
             <div class="contact-item">
@@ -37,10 +38,124 @@
                 </div>
                 <div class="contact-info">
                     <h3>Телефон</h3>
-                    <p>+7 (999) 123-45-67</p>
+                    <p>+7 (908) 880-19-09</p>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="contact-info">
+                    <h3>Email</h3>
+                    <p>info@autoexpert.ru</p>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="contact-info">
+                    <h3>График работы</h3>
+                    <p>Пн-Пт: 9:00-20:00<br>Сб-Вс: 10:00-18:00</p>
                 </div>
             </div>
             {% endfor %}
         </div>
+
+        <!-- Карта -->
+        <div class="map-section" style="margin-top: 3rem;">
+            <h3 style="text-align: center; margin-bottom: 2rem; font-size: 1.5rem;">Как нас найти</h3>
+            <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 1rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                    <!-- Информация о местоположении -->
+                    <div>
+                        <h4 style="margin-bottom: 1rem; color: #60a5fa;">Наш автосервис</h4>
+                        <div style="color: #d1d5db; line-height: 1.6;">
+                            <p>Мы находимся в удобном месте с хорошей транспортной доступностью.</p>
+
+                            <div style="margin-top: 1.5rem;">
+                                <h5 style="color: #60a5fa; margin-bottom: 0.5rem;">Адрес:</h5>
+                                <p style="font-weight: 500;" id="dynamic-address">
+                                    {% for contact in contacts %}
+                                        {% if contact.icon == 'fas fa-map-marker-alt' %}
+                                            {{ contact.value|linebreaksbr }}
+                                        {% endif %}
+                                    {% empty %}
+                                        {{ company_info.DEFAULT_ADDRESS }}
+                                    {% endfor %}
+                                </p>
+                            </div>
+
+                            <div style="margin-top: 1.5rem;">
+                                <h5 style="color: #60a5fa; margin-bottom: 0.5rem;">Удобства:</h5>
+                                <ul style="color: #d1d5db; padding-left: 1.5rem;">
+                                    <li>🅿️ Бесплатная парковка</li>
+                                    <li>☕ Зона ожидания с кофе</li>
+                                    <li>📶 Бесплатный Wi-Fi</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карта -->
+                    <div style="height: 400px; border-radius: 0.5rem; overflow: hidden; position: relative;">
+                        {% for contact in contacts %}
+                            {% if contact.icon == 'fas fa-map-marker-alt' %}
+                                <a href="https://yandex.ru/maps/?text={{ contact.value|urlencode }}"
+                                   target="_blank"
+                                   style="display: block; width: 100%; height: 100%; position: relative;">
+                            {% endif %}
+                        {% empty %}
+                        <a href="https://yandex.ru/maps/?text={{ company_info.DEFAULT_ADDRESS|urlencode }}"
+                           target="_blank"
+                           style="display: block; width: 100%; height: 100%; position: relative;">
+                        {% endfor %}
+                            <img src="https://static-maps.yandex.ru/1.x/?ll=37.617698,55.755864&size=650,400&z=15&l=map&pt=37.617698,55.755864,pm2blm"
+                                 alt="Карта расположения {{ company_info.NAME }}"
+                                 style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 50%, rgba(0,0,0,0.3) 100%);"></div>
+                            <div style="position: absolute; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500;">
+                                📍 Открыть в Яндекс.Картах
+                            </div>
+                            <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(37, 99, 235, 0.9); color: white; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; backdrop-filter: blur(10px);">
+                                <i class="fas fa-map-marker-alt"></i> {{ company_info.NAME }}
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
+
+<script>
+// Функция форматирования телефона
+function formatPhoneNumber(phone) {
+    const cleaned = phone.replace(/\D/g, '');
+
+    if (cleaned.length === 11 && ['7', '8'].includes(cleaned[0])) {
+        return `+7 (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9, 11)}`;
+    } else if (cleaned.length === 10) {
+        return `+7 (${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 8)}-${cleaned.slice(8, 10)}`;
+    }
+
+    return phone;
+}
+
+// Функция для форматирования контактов после загрузки страницы
+document.addEventListener('DOMContentLoaded', function() {
+    const contactValues = document.querySelectorAll('.contact-value');
+
+    contactValues.forEach(element => {
+        const icon = element.getAttribute('data-icon');
+        const value = element.getAttribute('data-value');
+
+        if (icon === 'fas fa-phone') {
+            const formattedPhone = formatPhoneNumber(value);
+            element.innerHTML = `<a href="tel:${value}" style="color: #d1d5db; text-decoration: none;">${formattedPhone}</a>`;
+        } else if (icon === 'fas fa-envelope') {
+            element.innerHTML = `<a href="mailto:${value}" style="color: #d1d5db; text-decoration: none;">${value}</a>`;
+        }
+    });
+});
+</script>

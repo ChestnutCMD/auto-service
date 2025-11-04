@@ -1,3 +1,4 @@
+<!-- templates/includes/services.html -->
 <section id="services" class="section section-white">
     <div class="container">
         <div class="section-header">
@@ -15,6 +16,7 @@
                         <img src="{{ service.photos.first.photo.url }}"
                              alt="{{ service.tittle }}"
                              class="service-photo"
+                             id="photo-{{ service.id }}"
                              data-service-id="{{ service.id }}"
                              data-photo-index="0">
                     {% else %}
@@ -27,17 +29,15 @@
 
                     {% if service.photos.count > 1 %}
                     <div class="photo-nav">
-                        <button class="photo-nav-btn prev-btn"
-                                onclick="changePhoto('{{ service.id }}', -1)">
+                        <button class="photo-nav-btn" onclick="prevPhoto({{ service.id }})">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button class="photo-nav-btn next-btn"
-                                onclick="changePhoto('{{ service.id }}', 1)">
+                        <button class="photo-nav-btn" onclick="nextPhoto({{ service.id }})">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
                     <div class="photo-counter">
-                        <span class="current-photo">1</span>/<span class="total-photos">{{ service.photos.count }}</span>
+                        <span id="counter-{{ service.id }}">1</span>/{{ service.photos.count }}
                     </div>
                     {% endif %}
                 </div>
@@ -62,7 +62,11 @@
                         </div>
                     </div>
 
-                    <button class="btn-primary" style="width: 100%; padding: 0.75rem; font-size: 1rem; justify-content: center;">
+                    <button class="btn-primary book-service-btn"
+                            style="width: 100%; padding: 0.75rem; font-size: 1rem; justify-content: center;"
+                            data-service-id="{{ service.id }}"
+                            data-service-name="{{ service.tittle }}"
+                            data-service-price="{{ service.price }}">
                         <i class="fas fa-calendar-check"></i> Записаться онлайн
                     </button>
                 </div>
@@ -83,3 +87,6 @@
         </div>
     </div>
 </section>
+
+<!-- Включаем модальное окно -->
+{% include 'includes/booking_modal.html' %}

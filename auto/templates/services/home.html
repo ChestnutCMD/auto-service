@@ -1,11 +1,13 @@
+<!-- templates/services/home.html -->
 {% extends 'base.html' %}
+{% load contact_filters %}
 
 {% block title %}🚗 Автосервис - Главная{% endblock %}
 
 {% block content %}
     {% include 'includes/hero.html' %}
     {% include 'includes/services.html' %}
-    
+
     <!-- Секция преимуществ -->
     <section id="advantages" class="section bg-gradient-to-br from-gray-900 to-blue-900 text-white">
         <div class="container">
@@ -15,15 +17,19 @@
                     Мы заботимся о вашем автомобиле как о своем собственном
                 </p>
             </div>
-            
+
             <div class="advantages-grid">
                 <!-- Добавьте преимущества здесь -->
             </div>
         </div>
     </section>
+
 {% endblock %}
 
 {% block scripts %}
+// Глобальный объект для хранения данных о фото
+const servicePhotos = {};
+
 // Функция для плавной прокрутки к контактам
 function scrollToContacts() {
     document.getElementById('contacts').scrollIntoView({
@@ -31,32 +37,250 @@ function scrollToContacts() {
     });
 }
 
-// Функция для переключения фотографий
+// Функции для работы с модальным окном бронирования
+function openBookingModal(serviceId, serviceName, servicePrice) {
+    const modal = document.getElementById('bookingModal');
+    const form = document.getElementById('bookingForm');
+    const serviceField = form.querySelector('#id_attendance');
+    const title = document.getElementById('bookingModalTitle');
+
+    // Устанавливаем ID услуги в скрытое поле
+    serviceField.value = serviceId;
+
+    // Обновляем заголовок с названием услуги и ценой
+    title.innerHTML = `<i class="fas fa-calendar-check"></i> ${serviceName} - ${servicePrice} ₽`;
+
+    // Устанавливаем минимальную дату (текущее время)
+    const now = new Date();
+    const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16);
+    document.getElementById('id_time').min = localDateTime;
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+
+    // Очищаем ошибки
+    document.querySelectorAll('.form-error').forEach(error => {
+        error.textContent = '';
+    });
+}
+
+// Функция для показа сообщений
+function showMessage(text, type) {
+    const container = document.querySelector('.messages-container') || createMessagesContainer();
+    const message = document.createElement('div');
+    message.className = `alert alert-${type}`;
+    message.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            ${text}
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    container.appendChild(message);
+
+    setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => {
+            if (message.parentElement) {
+                message.parentElement.removeChild(message);
+            }
+        }, 300);
+    }, 5000);
+}
+
+function createMessagesContainer() {
+    const container = document.createElement('div');
+    container.className = 'messages-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Функции переключения фото
+function nextPhoto(serviceId) {
+    changePhoto(serviceId, 1);
+}
+
+function prevPhoto(serviceId) {
+    changePhoto(serviceId, -1);
+}
+
 function changePhoto(serviceId, direction) {
-    const serviceElement = document.querySelector(`.service-photo[data-service-id="${serviceId}"]`);
-    if (!serviceElement) return;
-    
-    const currentIndex = parseInt(serviceElement.getAttribute('data-photo-index'));
-    const photoCounter = serviceElement.closest('.service-image').querySelector('.photo-counter');
-    
-    if (!photoCounter) return;
-    
-    const totalPhotos = parseInt(photoCounter.querySelector('.total-photos').textContent);
+    const photoContainer = document.querySelector(`#photo-${serviceId}`).parentElement;
+    const counterElement = document.getElementById(`counter-${serviceId}`);
+
+    if (!photoContainer || !counterElement) return;
+
+    let currentIndex = parseInt(document.getElementById(`photo-${serviceId}`).getAttribute('data-photo-index') || '0');
+    const photos = servicePhotos[serviceId];
+    if (!photos || photos.length <= 1) return;
+
+    const totalPhotos = photos.length;
     let newIndex = currentIndex + direction;
-    
     if (newIndex < 0) newIndex = totalPhotos - 1;
     if (newIndex >= totalPhotos) newIndex = 0;
-    
-    serviceElement.style.opacity = '0.7';
-    serviceElement.style.transform = 'scale(0.95)';
-    
+
+    const currentPhoto = document.getElementById(`photo-${serviceId}`);
+    const newPhoto = document.createElement('img');
+    newPhoto.src = photos[newIndex];
+    newPhoto.alt = currentPhoto.alt;
+    newPhoto.className = 'service-photo photo-next';
+
+    photoContainer.appendChild(newPhoto);
+
+    const currentOutClass = direction > 0 ? 'slide-out-left' : 'slide-out-right';
+    const newInClass = direction > 0 ? 'slide-in-right' : 'slide-in-left';
+
+    currentPhoto.classList.add(currentOutClass);
+    newPhoto.classList.add(newInClass);
+
+    counterElement.textContent = newIndex + 1;
+
     setTimeout(() => {
-        serviceElement.style.opacity = '1';
-        serviceElement.style.transform = 'scale(1)';
-        serviceElement.setAttribute('data-photo-index', newIndex);
-        
-        const currentPhoto = photoCounter.querySelector('.current-photo');
-        currentPhoto.textContent = newIndex + 1;
-    }, 200);
+        currentPhoto.src = photos[newIndex];
+        currentPhoto.setAttribute('data-photo-index', newIndex);
+        currentPhoto.classList.remove(currentOutClass);
+        photoContainer.removeChild(newPhoto);
+    }, 500);
 }
+
+// Основная инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // Загрузка всех фото через Django template
+    {% for service in services %}
+    {% if service.photos.all %}
+    servicePhotos[{{ service.id }}] = [
+        {% for photo in service.photos.all %}
+        "{{ photo.photo.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    {% endif %}
+    {% endfor %}
+
+    // Предзагрузка изображений
+    Object.values(servicePhotos).forEach(photos => {
+        photos.forEach(photoUrl => {
+            const img = new Image();
+            img.src = photoUrl;
+        });
+    });
+
+    // Обработчики для кнопок записи
+    const bookButtons = document.querySelectorAll('.book-service-btn');
+    
+    bookButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const serviceId = this.getAttribute('data-service-id');
+            const serviceName = this.getAttribute('data-service-name');
+            const servicePrice = this.getAttribute('data-service-price');
+            openBookingModal(serviceId, serviceName, servicePrice);
+        });
+    });
+
+    // Маска для телефона
+    const phoneInput = document.getElementById('id_phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value[0] === '7' || value[0] === '8') {
+                    value = value.substring(1);
+                }
+                let formattedValue = '+7';
+                if (value.length > 0) {
+                    formattedValue += ' (' + value.substring(0, 3);
+                }
+                if (value.length > 3) {
+                    formattedValue += ') ' + value.substring(3, 6);
+                }
+                if (value.length > 6) {
+                    formattedValue += '-' + value.substring(6, 8);
+                }
+                if (value.length > 8) {
+                    formattedValue += '-' + value.substring(8, 10);
+                }
+                e.target.value = formattedValue;
+            }
+        });
+    }
+
+    // Обработка отправки формы бронирования
+    const bookingForm = document.getElementById('bookingForm');
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Очищаем предыдущие ошибки
+            document.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+            });
+
+            const formData = new FormData(this);
+
+            fetch('', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeBookingModal();
+                    showMessage(data.message, 'success');
+                    bookingForm.reset();
+                } else {
+                    // Показываем ошибки
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const errorElement = document.getElementById(field + '_error');
+                            if (errorElement) {
+                                errorElement.textContent = data.errors[field][0]?.message || data.errors[field][0];
+                            }
+                        });
+                    }
+                    if (data.message) {
+                        showMessage(data.message, 'error');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Произошла ошибка при отправке формы', 'error');
+            });
+        });
+    }
+
+    // Автоматическое скрытие системных сообщений Django
+    const messages = document.querySelectorAll('.alert');
+    messages.forEach(message => {
+        setTimeout(() => {
+            message.style.opacity = '0';
+            setTimeout(() => {
+                if (message.parentElement) {
+                    message.parentElement.removeChild(message);
+                }
+            }, 300);
+        }, 5000);
+    });
+});
+
+// Закрытие модального окна при клике вне его
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('bookingModal');
+    if (event.target === modal) {
+        closeBookingModal();
+    }
+});
 {% endblock %}
