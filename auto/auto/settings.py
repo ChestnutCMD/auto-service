@@ -61,9 +61,9 @@ WSGI_APPLICATION = 'auto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'autoservice_db'),
-        'USER': os.getenv('POSTGRES_USER', 'autoservice_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'autoservice_password'),
+        'NAME': os.getenv('DB_NAME', 'autoservice_db'),
+        'USER': os.getenv('DB_USER', 'autoservice_user'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'autoservice_password'),
         'HOST': 'postgres',
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
         'CONN_MAX_AGE': 600,
