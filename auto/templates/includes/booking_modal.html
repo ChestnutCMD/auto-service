@@ -1,4 +1,3 @@
-<!-- Убедитесь что модальное окно имеет правильную структуру -->
 <div id="bookingModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -45,21 +44,57 @@
                 </select>
             </div>
 
+            <!-- Кастомный календарь -->
             <div class="form-group">
-                <label for="id_time" class="form-label">
-                    <i class="fas fa-calendar-alt"></i> Желаемое время *
+                <label class="form-label">
+                    <i class="fas fa-calendar-alt"></i> Выберите дату и время *
                 </label>
-                <input type="datetime-local" name="time" id="id_time" required
-                       class="form-input">
+
+                <div class="custom-calendar">
+                    <div class="calendar-header">
+                        <button type="button" class="calendar-nav" id="prevMonth">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h4 id="currentMonthYear">Ноябрь 2025</h4>
+                        <button type="button" class="calendar-nav" id="nextMonth">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <div>Пн</div>
+                        <div>Вт</div>
+                        <div>Ср</div>
+                        <div>Чт</div>
+                        <div>Пт</div>
+                        <div>Сб</div>
+                        <div>Вс</div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid">
+                        <!-- Динамически заполняется JavaScript -->
+                    </div>
+
+                    <div class="time-selection" id="timeSelection" style="display: none;">
+                        <h5 style="margin-bottom: 1rem; color: #374151; font-size: 0.9rem;">Выберите время:</h5>
+                        <div class="time-slots" id="timeSlots">
+                            <!-- Динамически заполняется JavaScript -->
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="time" id="selectedDateTime" required>
+                    <input type="hidden" id="selectedDate" value="">
+                </div>
+
                 <div class="form-error" id="time_error"></div>
-                <small class="form-hint">Выберите удобную дату и время</small>
+                <small class="form-hint">Зеленым выделены доступные для записи даты</small>
             </div>
 
             <!-- Согласие с политикой -->
-            <div class="privacy-agreement" style="margin: 1rem 0; padding: 1rem; background: #f8f9fa; border-radius: 0.5rem;">
-                <label style="display: flex; align-items: flex-start; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" name="privacy_agreement" required style="margin-top: 0.25rem;">
-                    <span style="font-size: 0.875rem;">
+            <div class="privacy-agreement">
+                <label>
+                    <input type="checkbox" name="privacy_agreement" required>
+                    <span>
                         Я соглашаюсь с
                         <a href="/privacy/" target="_blank" style="color: #2563eb; text-decoration: underline;">
                             политикой конфиденциальности
@@ -74,7 +109,7 @@
                     <i class="fas fa-times"></i> Отмена
                 </button>
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Записаться на услугу
+                    <i class="fas fa-paper-plane"></i> Записаться
                 </button>
             </div>
         </form>

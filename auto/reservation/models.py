@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -32,6 +34,10 @@ class Reservations(models.Model):
         return f"{self.attendance} - {self.name} - {self.time.strftime('%d.%m.%Y %H:%M')}"
 
     def clean(self):
+        # Проверяем что time установлен
+        if not self.time:
+            raise ValidationError('Время не указано')
+
         # Проверка на пересечение времени
         if self.time < timezone.now():
             raise ValidationError('Нельзя создавать запись в прошлом')
@@ -87,3 +93,108 @@ class WorkSchedule(models.Model):
 
     def __str__(self):
         return f"{self.get_day_of_week_display()}: {self.start_time} - {self.end_time}"
+
+    @classmethod
+    def get_working_datetime_slots(cls, date, service_duration):
+        """Возвращает список доступных временных слотов для даты"""
+        try:
+            schedule = cls.objects.get(day_of_week=date.weekday(), is_working=True)
+        except cls.DoesNotExist:
+            return []
+
+        slots = []
+        current_time = datetime.combine(date, schedule.start_time)
+        end_time = datetime.combine(date, schedule.end_time)
+
+        slot_duration = timedelta(minutes=30)
+
+        while current_time + service_duration <= end_time:
+            if not cls.is_slot_occupied(current_time, service_duration):
+                slots.append(current_time)
+            current_time += slot_duration
+
+        return slots
+
+    @classmethod
+    def get_available_dates(cls, days_ahead=30):
+        """Возвращает список дат, когда есть рабочие дни"""
+        available_dates = []
+        today = timezone.now().date()
+
+        for i in range(days_ahead):
+            date = today + timedelta(days=i)
+            try:
+                schedule = cls.objects.get(day_of_week=date.weekday(), is_working=True)
+                available_dates.append(date)
+            except cls.DoesNotExist:
+                continue
+        return available_dates
+
+    @classmethod
+    def get_available_dates_simple(cls, days_ahead=30):
+        """Упрощенная версия получения доступных дат"""
+        available_dates = []
+        today = timezone.now().date()
+
+        for i in range(days_ahead):
+            date = today + timedelta(days=i)
+            try:
+                schedule = cls.objects.get(day_of_week=date.weekday(), is_working=True)
+                available_dates.append(date)
+            except cls.DoesNotExist:
+                continue
+
+        return available_dates
+
+    @classmethod
+    def is_working_time_simple(cls, start_time, duration):
+        """Упрощенная проверка рабочего времени"""
+        try:
+            schedule = cls.objects.get(day_of_week=start_time.weekday(), is_working=True)
+            end_time = start_time + duration
+
+            start_time_only = start_time.time()
+            end_time_only = end_time.time()
+
+            return (start_time_only >= schedule.start_time and
+                    end_time_only <= schedule.end_time)
+        except cls.DoesNotExist:
+            return False
+
+    @classmethod
+    def is_working_time(cls, start_time, duration):
+        """Проверяет, попадает ли время бронирования в рабочие часы"""
+        try:
+            # Получаем расписание для дня недели
+            schedule = cls.objects.get(day_of_week=start_time.weekday(), is_working=True)
+
+            # Вычисляем время окончания услуги
+            end_time = start_time + duration
+
+            # Преобразуем в time для сравнения
+            start_time_only = start_time.time()
+            end_time_only = end_time.time()
+
+            # Проверяем, что время попадает в рабочие часы
+            return (start_time_only >= schedule.start_time and
+                    end_time_only <= schedule.end_time)
+
+        except cls.DoesNotExist:
+            # Если расписание не найдено для этого дня, день не рабочий
+            return False
+
+    @classmethod
+    def is_slot_occupied(cls, start_time, duration):
+        """Проверяет, занят ли временной слот"""
+        from .models import Reservations
+
+        end_time = start_time + duration
+
+        # Ищем пересекающиеся бронирования
+        overlapping = Reservations.objects.filter(
+            time__lt=end_time,
+            time__gte=start_time,
+            status__in=['pending', 'confirmed']
+        ).exists()
+
+        return overlapping
