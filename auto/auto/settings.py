@@ -11,6 +11,22 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
+if DEBUG:
+    # Настройки для разработки
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_BROWSER_XSS_FILTER = False
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+else:
+    # Настройки для продакшена
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
 INSTALLED_APPS = [
     'admin_interface',
     'colorfield',
@@ -64,8 +80,8 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', 'autoservice_db'),
         'USER': os.getenv('DB_USER', 'autoservice_user'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'autoservice_password'),
-        'HOST': 'postgres',
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'HOST': os.getenv('DB_HOST', 'postgres'),
+        'PORT': os.getenv('DB_PORT', '5432'),
         'CONN_MAX_AGE': 600,
         'OPTIONS': {
             'connect_timeout': 10,

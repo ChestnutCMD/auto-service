@@ -7,6 +7,7 @@ from auto import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('attendance.urls')),
+    path('', include('reservation.urls')),
 ]
 
 if settings.DEBUG:
