@@ -10,7 +10,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', False)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://vmyata-hm.ru',
+    'https://www.vmyata-hm.ru',
+]
 if DEBUG:
     # Настройки для разработки
     SECURE_SSL_REDIRECT = False
