@@ -283,4 +283,53 @@ window.addEventListener('click', function(event) {
         closeBookingModal();
     }
 });
+
+// Функции для мобильного меню
+function openMobileMenu() {
+    document.getElementById('mobileMenu').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+    document.getElementById('mobileMenu').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Инициализация меню
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenuClose = document.getElementById('mobileMenuClose');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    // Открытие меню
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', openMobileMenu);
+    }
+
+    // Закрытие меню
+    if (mobileMenuClose) {
+        mobileMenuClose.addEventListener('click', closeMobileMenu);
+    }
+
+    // Закрытие при клике вне меню
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', function(e) {
+            if (e.target === mobileMenu) {
+                closeMobileMenu();
+            }
+        });
+    }
+
+    // Закрытие при нажатии Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMobileMenu();
+        }
+    });
+
+    // Закрытие при переходе по ссылке
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+    });
+});
 {% endblock %}
