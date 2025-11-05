@@ -319,6 +319,8 @@ function renderCalendar(data) {
 
 // Выбор даты
 async function selectDate(date, element) {
+    console.log(`Date selected: ${date}`);
+
     // Снимаем выделение со всех дней
     document.querySelectorAll('.calendar-day').forEach(day => {
         day.classList.remove('selected');
@@ -368,21 +370,21 @@ function markTimeAsBooked(datetime) {
 // Загрузка доступного времени
 async function loadTimeSlots(date) {
     try {
+        console.log(`Loading time slots for date: ${date}, service: ${calendarServiceId}`);
+
         const response = await fetch(`/api/available-time/?date=${date}&service_id=${calendarServiceId}`);
 
         if (response.ok) {
             const data = await response.json();
+            console.log('Available slots:', data.slots);
 
-            // Дополнительная фильтрация на клиенте
-            const filteredSlots = data.slots.filter(slot => {
-                return !bookedSlots.has(slot.datetime);
-            });
-
-            renderTimeSlots(filteredSlots);
+            renderTimeSlots(data.slots);
             const timeSelection = document.getElementById('timeSelection');
             if (timeSelection) timeSelection.style.display = 'block';
+
         } else {
-            console.error('Error loading time slots:', data.error);
+            const errorData = await response.json();
+            console.error('Error loading time slots:', errorData);
             showMessage('Ошибка загрузки доступного времени', 'error');
         }
     } catch (error) {
@@ -406,20 +408,13 @@ function renderTimeSlots(slots) {
     slots.forEach(slot => {
         const timeSlot = document.createElement('button');
         timeSlot.type = 'button';
-        timeSlot.className = 'time-slot';
+        timeSlot.className = 'time-slot available';
         timeSlot.textContent = slot.display;
         timeSlot.dataset.datetime = slot.datetime;
 
-        // Проверяем занят ли слот
-        if (bookedSlots.has(slot.datetime)) {
-            timeSlot.classList.add('unavailable');
-            timeSlot.disabled = true;
-            timeSlot.title = 'Время занято';
-        } else {
-            timeSlot.addEventListener('click', () => {
-                selectTimeSlot(slot.datetime, timeSlot);
-            });
-        }
+        timeSlot.addEventListener('click', () => {
+            selectTimeSlot(slot.datetime, timeSlot);
+        });
 
         timeSlotsContainer.appendChild(timeSlot);
     });
@@ -526,6 +521,7 @@ if (bookingForm) {
         }
 
         const formData = new FormData(this);
+        const selectedTime = document.getElementById('selectedDateTime').value;
 
         fetch('', {
             method: 'POST',
@@ -537,20 +533,14 @@ if (bookingForm) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Помечаем время как занятое
-                const selectedTime = document.getElementById('selectedDateTime').value;
-                if (selectedTime) {
-                    markTimeAsBooked(selectedTime);
-                }
-
                 closeBookingModal();
                 showMessage(data.message, 'success');
                 bookingForm.reset();
 
-                // Перезагружаем занятые слоты
+                // Показываем сообщение об успехе
                 setTimeout(() => {
-                    loadBookedSlots();
-                }, 1000);
+                    showMessage('Заявка успешно создана! Мы свяжемся с вами для подтверждения.', 'success');
+                }, 100);
 
             } else {
                 // Показываем ошибки
@@ -561,6 +551,14 @@ if (bookingForm) {
                             errorElement.textContent = data.errors[field][0]?.message || data.errors[field][0];
                         }
                     });
+
+                    // Если ошибка связана со временем, перезагружаем слоты
+                    if (data.errors.time) {
+                        const selectedDate = document.getElementById('selectedDate').value;
+                        if (selectedDate) {
+                            loadTimeSlots(selectedDate);
+                        }
+                    }
                 }
                 if (data.message) {
                     showMessage(data.message, 'error');

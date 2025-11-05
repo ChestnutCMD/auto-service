@@ -56,7 +56,7 @@ def format_reservation_message(reservation):
     communication = communication_map.get(reservation.communication, reservation.communication)
 
     message = (
-        "🆕 <b>НОВАЯ ЗАЯВКА НА БРОНИРОВАНИЕ</b>\n\n"
+        "🆕 <b>НОВАЯ ЗАЯВКА</b>\n\n"
         f"<b>Услуга:</b> {reservation.attendance.tittle}\n"
         f"<b>Клиент:</b> {reservation.name}\n"
         f"<b>Телефон:</b> <code>{reservation.phone}</code>\n"

@@ -40,52 +40,104 @@ def get_available_time_slots(request):
         date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
         now = timezone.now()
 
-        # Получаем занятые слоты на эту дату
-        booked_slots = Reservations.objects.filter(
+        print(f"🔍 Checking availability for {date_str}, service: {service.tittle} (duration: {service.duration})")
+
+        # Получаем ВСЕ бронирования на эту дату
+        booked_reservations = Reservations.objects.filter(
             time__date=date_obj,
             status__in=['pending', 'confirmed']
         ).select_related('attendance')
 
-        # Создаем множество занятых времен
-        booked_times = set()
-        for reservation in booked_slots:
-            # Добавляем все время от начала до конца услуги
-            current_time = reservation.time
+        print(f"📋 Found {booked_reservations.count()} booked reservations")
+
+        # Создаем множество ЗАБЛОКИРОВАННЫХ временных слотов
+        blocked_slots = set()
+
+        for reservation in booked_reservations:
+            start_time = reservation.time
             end_time = reservation.time + reservation.attendance.duration
 
-            while current_time < end_time:
-                booked_times.add(current_time.strftime('%Y-%m-%dT%H:%M'))
-                current_time += timedelta(minutes=30)  # 30-минутные интервалы
+            print(f"🚫 Booked: {start_time.time()} to {end_time.time()} ({reservation.attendance.tittle})")
 
-        # Генерируем доступные слоты
-        slots = []
+            # Блокируем все 30-минутные слоты в этом интервале
+            current_slot = start_time
+            while current_slot < end_time:
+                slot_key = current_slot.strftime('%H:%M')
+                blocked_slots.add(slot_key)
+                print(f"   Blocked slot: {slot_key}")
+                current_slot += timedelta(minutes=30)
+
+        # Генерируем все возможные слоты (каждые 30 минут с 9:00 до 18:00)
+        all_slots = []
+        base_date = datetime.combine(date_obj, time(0, 0))
+
         for hour in range(9, 18):
-            for minute in [0, 30]:  # Слоты каждые 30 минут
-                slot_time_str = f"{date_str}T{hour:02d}:{minute:02d}"
+            for minute in [0, 30]:
+                slot_time = timezone.make_aware(base_date.replace(hour=hour, minute=minute))
+                all_slots.append(slot_time)
 
-                # Проверяем что время не занято
-                if slot_time_str not in booked_times:
-                    # Создаем datetime для проверки что время в будущем
-                    slot_datetime = datetime.strptime(slot_time_str, '%Y-%m-%dT%H:%M')
-                    slot_datetime_aware = timezone.make_aware(slot_datetime)
+        # Фильтруем доступные слоты
+        available_slots = []
 
-                    if slot_datetime_aware > now:
-                        slots.append({
-                            'datetime': slot_time_str,
-                            'display': f"{hour:02d}:{minute:02d}"
-                        })
+        for slot_time in all_slots:
+            slot_key = slot_time.strftime('%H:%M')
+
+            # Проверяем что время в будущем
+            if slot_time <= now:
+                print(f"⏰ Slot {slot_key} is in past, skipping")
+                continue
+
+            # Проверяем что слот не заблокирован
+            if slot_key in blocked_slots:
+                print(f"❌ Slot {slot_key} is BLOCKED, skipping")
+                continue
+
+            # Дополнительная проверка: убеждаемся что вся услуга помещается
+            # без пересечения с другими бронированиями
+            slot_end_time = slot_time + service.duration
+            has_conflict = False
+
+            for reservation in booked_reservations:
+                res_start = reservation.time
+                res_end = reservation.time + reservation.attendance.duration
+
+                # Проверяем пересечение: (start1 < end2) and (start2 < end1)
+                if (slot_time < res_end) and (res_start < slot_end_time):
+                    print(f"⚡ Slot {slot_key} conflicts with {res_start.time()}-{res_end.time()}")
+                    has_conflict = True
+                    break
+
+            if not has_conflict:
+                available_slots.append({
+                    'datetime': slot_time.strftime('%Y-%m-%dT%H:%M'),
+                    'display': slot_key
+                })
+                print(f"✅ Slot {slot_key} is AVAILABLE")
+            else:
+                print(f"❌ Slot {slot_key} has conflict, skipping")
+
+        print(f"🎯 Total available slots: {len(available_slots)}")
+        print(f"🚫 Blocked slots: {blocked_slots}")
 
         return JsonResponse({
             'date': date_str,
-            'slots': slots
+            'slots': available_slots,
+            'debug': {
+                'total_slots': len(all_slots),
+                'booked_reservations': booked_reservations.count(),
+                'blocked_slots_count': len(blocked_slots),
+                'blocked_slots_list': list(blocked_slots),
+                'available_slots': len(available_slots)
+            }
         })
 
     except Attendance.DoesNotExist:
         return JsonResponse({'error': 'Service not found'}, status=404)
     except Exception as e:
-        print(f"Error in get_available_time_slots: {str(e)}")
+        print(f"❌ Error in get_available_time_slots: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=400)
-
 
 def get_available_dates(request):
     """API endpoint для получения доступных дат"""
@@ -217,7 +269,7 @@ def get_sample_time_slots():
 
 @csrf_exempt
 def get_available_time_slots(request):
-    """API для получения временных слотов"""
+    """API для получения доступных временных слотов с учетом занятых и рабочего графика"""
     if request.method != 'GET':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -228,33 +280,105 @@ def get_available_time_slots(request):
         return JsonResponse({'error': 'Missing parameters'}, status=400)
 
     try:
-        # Создаем date объект
+        # Получаем услугу
+        service = Attendance.objects.get(id=service_id)
         date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
         now = timezone.now()
 
-        slots = []
-        for hour in range(9, 18):
-            # Создаем timezone-aware datetime для слота
-            slot_time = timezone.make_aware(
-                datetime.combine(date_obj, time(hour, 0))
-            )
+        print(f"🔍 Checking availability for {date_str}, service: {service.tittle}")
 
-            # Правильное сравнение
-            if slot_time > now:
-                slots.append({
-                    'datetime': slot_time.strftime('%Y-%m-%dT%H:%M'),
-                    'display': slot_time.strftime('%H:%M')
+        # Получаем рабочий график на этот день
+        try:
+            work_schedule = WorkSchedule.objects.get(
+                day_of_week=date_obj.weekday(),
+                is_working=True
+            )
+            work_start = work_schedule.start_time
+            work_end = work_schedule.end_time
+            print(f"📅 Work schedule: {work_start} - {work_end}")
+        except WorkSchedule.DoesNotExist:
+            print(f"❌ No work schedule for {date_obj.strftime('%A')}")
+            return JsonResponse({
+                'date': date_str,
+                'slots': [],
+                'error': 'В этот день сервис не работает'
+            })
+
+        # Получаем ВСЕ бронирования на эту дату
+        booked_reservations = Reservations.objects.filter(
+            time__date=date_obj,
+            status__in=['pending', 'confirmed']
+        ).select_related('attendance')
+
+        print(f"📋 Found {booked_reservations.count()} booked reservations")
+
+        # Создаем список занятых интервалов
+        booked_intervals = []
+        for reservation in booked_reservations:
+            start_time = reservation.time
+            end_time = reservation.time + reservation.attendance.duration
+            booked_intervals.append({
+                'start': start_time,
+                'end': end_time
+            })
+            print(f"🚫 Booked: {start_time.time()} to {end_time.time()}")
+
+        # Генерируем слоты каждые 30 минут в рабочее время
+        available_slots = []
+        current_time = timezone.make_aware(
+            datetime.combine(date_obj, work_start)
+        )
+        work_end_time = timezone.make_aware(
+            datetime.combine(date_obj, work_end)
+        )
+
+        slot_duration = timedelta(minutes=30)
+
+        while current_time + service.duration <= work_end_time:
+            slot_end_time = current_time + service.duration
+
+            # Проверяем что время в будущем
+            if current_time <= now:
+                current_time += slot_duration
+                continue
+
+            # Проверяем что слот не пересекается с занятыми интервалами
+            is_available = True
+            for interval in booked_intervals:
+                # Проверяем пересечение: (start1 < end2) and (start2 < end1)
+                if (current_time < interval['end']) and (interval['start'] < slot_end_time):
+                    is_available = False
+                    break
+
+            if is_available:
+                available_slots.append({
+                    'datetime': current_time.strftime('%Y-%m-%dT%H:%M'),
+                    'display': current_time.strftime('%H:%M')
                 })
+                print(f"✅ Available: {current_time.strftime('%H:%M')}")
+            else:
+                print(f"❌ Blocked: {current_time.strftime('%H:%M')}")
+
+            current_time += slot_duration
+
+        print(f"🎯 Total available slots: {len(available_slots)}")
 
         return JsonResponse({
             'date': date_str,
-            'slots': slots
+            'slots': available_slots,
+            'work_schedule': {
+                'start': work_start.strftime('%H:%M'),
+                'end': work_end.strftime('%H:%M')
+            }
         })
 
+    except Attendance.DoesNotExist:
+        return JsonResponse({'error': 'Service not found'}, status=404)
     except Exception as e:
-        print(f"Error in get_available_time_slots: {str(e)}")
+        print(f"❌ Error in get_available_time_slots: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=400)
-
 
 @csrf_exempt
 def test_api(request):

@@ -51,7 +51,7 @@ def home(request):
                     # Сохраняем бронирование (уведомление отправится автоматически через model.save())
                     reservation.save()
 
-                    success_message = 'Заявка на бронирование успешно создана! Мы свяжемся с вами для подтверждения.'
+                    success_message = 'Заявка успешно создана! Мы свяжемся с вами для подтверждения.'
 
                     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                         return JsonResponse({
