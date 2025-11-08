@@ -374,14 +374,62 @@
             color: #2563eb;
         }
 
+        .service-description-container {
+            position: relative;
+        }
+
+        .service-description.expanded {
+            -webkit-line-clamp: unset;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .show-more-btn {
+            background: none;
+            border: none;
+            color: #2563eb;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0;
+            transition: color 0.2s;
+        }
+
+        .show-more-btn:hover {
+            color: #1d4ed8;
+        }
+
+        .show-more-btn i {
+            font-size: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+
+        .show-more-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
         .service-description {
-            color: #6b7280;
-            margin-bottom: 1rem;
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            transition: all 0.3s ease;
             line-height: 1.5;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Градиент для показа что текст обрезан */
+        .service-description:not(.expanded)::after {
+            content: "";
+            position: absolute;
+            bottom: 1.5rem;
+            left: 0;
+            right: 0;
+            height: 2rem;
+            background: linear-gradient(transparent, white);
+            pointer-events: none;
         }
 
         .service-meta {

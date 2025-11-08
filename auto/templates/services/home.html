@@ -648,7 +648,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+// Функция для разворачивания/скрытия описания
+function toggleServiceDescription(serviceId) {
+    const description = document.getElementById(`description-${serviceId}`);
+    const button = document.querySelector(`.show-more-btn[data-service-id="${serviceId}"]`);
+    const showMoreText = button.querySelector('.show-more-text');
+    const showLessText = button.querySelector('.show-less-text');
+    const icon = button.querySelector('i');
 
+    if (description.classList.contains('expanded')) {
+        // Скрываем описание
+        description.classList.remove('expanded');
+        button.classList.remove('expanded');
+        showMoreText.style.display = 'inline';
+        showLessText.style.display = 'none';
+    } else {
+        // Показываем полное описание
+        description.classList.add('expanded');
+        button.classList.add('expanded');
+        showMoreText.style.display = 'none';
+        showLessText.style.display = 'inline';
+    }
+}
+
+// Инициализация при загрузке DOM
+document.addEventListener('DOMContentLoaded', function() {
+    // ... существующий код ...
+
+    // Обработчики для кнопок показа описания
+    const showMoreButtons = document.querySelectorAll('.show-more-btn');
+    showMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const serviceId = this.getAttribute('data-service-id');
+            toggleServiceDescription(serviceId);
+        });
+    });
+});
 // Закрытие модального окна при клике вне его
 window.addEventListener('click', function(event) {
     const modal = document.getElementById('bookingModal');

@@ -25,7 +25,7 @@
                         </div>
                     {% endif %}
 
-                    <div class="service-price">{{ service.price }} ₽</div>
+                    <div class="service-price">От {{ service.price }} ₽</div>
 
                     {% if service.photos.count > 1 %}
                     <div class="photo-nav">
@@ -45,14 +45,24 @@
                 <div class="service-content">
                     <h3 class="service-title">{{ service.tittle }}</h3>
 
-                    <p class="service-description">
-                        {{ service.description }}
-                    </p>
+                    <!-- Контейнер для описания с кнопкой разворачивания -->
+                    <div class="service-description-container">
+                        <p class="service-description" id="description-{{ service.id }}">
+                            {{ service.description }}
+                        </p>
+                        {% if service.description|length > 150 %}
+                        <button class="show-more-btn" data-service-id="{{ service.id }}">
+                            <span class="show-more-text">Показать полностью</span>
+                            <span class="show-less-text" style="display: none;">Скрыть</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        {% endif %}
+                    </div>
 
                     <div class="service-meta">
                         <div class="service-duration">
                             <i class="fas fa-clock"></i>
-                            <span>
+                            <span> От
                                 {% if service.get_duration_display %}
                                     {{ service.get_duration_display }}
                                 {% else %}
