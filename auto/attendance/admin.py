@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
+
+from attendance.form import AttendanceAdminForm
 from attendance.models import Attendance, PhotoAttendance
 from reservation.admin import admin_site
 
@@ -22,23 +24,23 @@ class PhotoAttendanceInline(admin.TabularInline):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
+    form = AttendanceAdminForm
     list_display = ['tittle', 'price', 'duration_display', 'is_active', 'photos_count']
     list_filter = ['is_active']
     search_fields = ['tittle', 'description']
     list_editable = ['is_active']
-    inlines = [PhotoAttendanceInline]  # Добавляем inline
+    inlines = [PhotoAttendanceInline]
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('tittle', 'description', 'price', 'duration', 'is_active'),
+            'fields': ('tittle', 'description', 'price', 'duration_minutes', 'is_active'),
             'classes': ('wide',)
         }),
     )
 
     def duration_display(self, obj):
-        hours = obj.duration.seconds // 3600
-        minutes = (obj.duration.seconds % 3600) // 60
-        return f"{hours}ч {minutes}м" if hours > 0 else f"{minutes} минут"
+        """Отображение длительности в списке"""
+        return obj.get_duration_display()
 
     duration_display.short_description = 'Длительность'
 
