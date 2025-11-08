@@ -234,53 +234,6 @@ const serviceGallery = {
     }
 };
 
-// Глобальные функции для модального окна
-if (typeof window.openBookingModal === 'undefined') {
-    window.openBookingModal = function(serviceId, serviceName, servicePrice) {
-        const modal = document.getElementById('bookingModal');
-        const form = document.getElementById('bookingForm');
-        const serviceField = form ? form.querySelector('#id_attendance') : null;
-        const title = document.getElementById('bookingModalTitle');
-
-        console.log('Opening modal for service:', serviceId, serviceName, servicePrice);
-
-        // Устанавливаем ID услуги
-        if (serviceField) serviceField.value = serviceId;
-
-        // Обновляем заголовок
-        if (title) {
-            title.innerHTML = `<i class="fas fa-calendar-check"></i> ${serviceName} - ${servicePrice} ₽`;
-        }
-
-        // Сбрасываем форму
-        if (form) form.reset();
-
-        // Сбрасываем выбор времени
-        const timeSelection = document.getElementById('timeSelection');
-        const selectedDateTime = document.getElementById('selectedDateTime');
-        const selectedDate = document.getElementById('selectedDate');
-
-        if (timeSelection) timeSelection.style.display = 'none';
-        if (selectedDateTime) selectedDateTime.value = '';
-        if (selectedDate) selectedDate.value = '';
-
-        // Показываем модальное окно
-        if (modal) {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-    };
-}
-
-if (typeof window.closeBookingModal === 'undefined') {
-    window.closeBookingModal = function() {
-        const modal = document.getElementById('bookingModal');
-        if (modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    };
-}
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {

@@ -522,11 +522,6 @@ if (bookingForm) {
                 showMessage(data.message, 'success');
                 bookingForm.reset();
 
-                // Показываем сообщение об успехе
-                setTimeout(() => {
-                    showMessage('Заявка успешно создана! Мы свяжемся с вами для подтверждения.', 'success');
-                }, 100);
-
             } else {
                 // Показываем ошибки
                 if (data.errors) {

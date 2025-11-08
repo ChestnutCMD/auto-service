@@ -1557,5 +1557,357 @@
         {% block scripts %}
         {% endblock %}
     </script>
+<!-- В base.html, перед закрывающим </body> -->
+<script>
+// Глобальные переменные и функции для всего сайта
+const servicePhotos = {};
+let calendarCurrentYear = new Date().getFullYear();
+let calendarCurrentMonth = new Date().getMonth() + 1;
+let calendarServiceId = null;
+
+// Функции для модального окна бронирования
+function openBookingModal(serviceId, serviceName, servicePrice) {
+    const modal = document.getElementById('bookingModal');
+    const form = document.getElementById('bookingForm');
+    const serviceField = form ? form.querySelector('#id_attendance') : null;
+    const title = document.getElementById('bookingModalTitle');
+
+    // Устанавливаем ID услуги
+    if (serviceField) serviceField.value = serviceId;
+    calendarServiceId = serviceId;
+
+    // Обновляем заголовок
+    if (title) {
+        title.innerHTML = `<i class="fas fa-calendar-check"></i> ${serviceName} - ${servicePrice} ₽`;
+    }
+
+    // Сбрасываем форму и календарь
+    if (form) form.reset();
+    const timeSelection = document.getElementById('timeSelection');
+    const selectedDateTime = document.getElementById('selectedDateTime');
+    const selectedDate = document.getElementById('selectedDate');
+
+    if (timeSelection) timeSelection.style.display = 'none';
+    if (selectedDateTime) selectedDateTime.value = '';
+    if (selectedDate) selectedDate.value = '';
+
+    // Инициализируем календарь
+    if (typeof initCalendar === 'function') {
+        initCalendar(serviceId);
+    }
+
+    // Показываем модальное окно
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeBookingModal() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Очищаем ошибки
+    document.querySelectorAll('.form-error').forEach(error => {
+        error.textContent = '';
+    });
+
+    // Сбрасываем выделение в календаре
+    document.querySelectorAll('.calendar-day.selected, .time-slot.selected').forEach(element => {
+        element.classList.remove('selected');
+    });
+}
+
+// Функция для показа сообщений
+function showMessage(text, type) {
+    const container = document.querySelector('.messages-container') || createMessagesContainer();
+    const message = document.createElement('div');
+    message.className = `alert alert-${type}`;
+    message.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            ${text}
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    container.appendChild(message);
+
+    setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => {
+            if (message.parentElement) {
+                message.parentElement.removeChild(message);
+            }
+        }, 300);
+    }, 5000);
+}
+
+function createMessagesContainer() {
+    const container = document.createElement('div');
+    container.className = 'messages-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Функции переключения фото
+function nextPhoto(serviceId) {
+    changePhoto(serviceId, 1);
+}
+
+function prevPhoto(serviceId) {
+    changePhoto(serviceId, -1);
+}
+
+function changePhoto(serviceId, direction) {
+    const photoContainer = document.querySelector(`#photo-${serviceId}`)?.parentElement;
+    const counterElement = document.getElementById(`counter-${serviceId}`);
+
+    if (!photoContainer || !counterElement) return;
+
+    let currentIndex = parseInt(document.getElementById(`photo-${serviceId}`).getAttribute('data-photo-index') || '0');
+    const photos = servicePhotos[serviceId];
+    if (!photos || photos.length <= 1) return;
+
+    const totalPhotos = photos.length;
+    let newIndex = currentIndex + direction;
+    if (newIndex < 0) newIndex = totalPhotos - 1;
+    if (newIndex >= totalPhotos) newIndex = 0;
+
+    const currentPhoto = document.getElementById(`photo-${serviceId}`);
+    const newPhoto = document.createElement('img');
+    newPhoto.src = photos[newIndex];
+    newPhoto.alt = currentPhoto.alt;
+    newPhoto.className = 'service-photo photo-next';
+
+    photoContainer.appendChild(newPhoto);
+
+    const currentOutClass = direction > 0 ? 'slide-out-left' : 'slide-out-right';
+    const newInClass = direction > 0 ? 'slide-in-right' : 'slide-in-left';
+
+    currentPhoto.classList.add(currentOutClass);
+    newPhoto.classList.add(newInClass);
+
+    counterElement.textContent = newIndex + 1;
+
+    setTimeout(() => {
+        currentPhoto.src = photos[newIndex];
+        currentPhoto.setAttribute('data-photo-index', newIndex);
+        currentPhoto.classList.remove(currentOutClass);
+        photoContainer.removeChild(newPhoto);
+    }, 500);
+}
+
+// КАЛЕНДАРЬ - Основные функции
+function initCalendar(serviceId) {
+    calendarServiceId = serviceId;
+    loadCalendarData(calendarCurrentYear, calendarCurrentMonth);
+
+    // Назначаем обработчики для кнопок навигации
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
+
+    if (prevMonthBtn) {
+        prevMonthBtn.onclick = () => changeMonth(-1);
+    }
+    if (nextMonthBtn) {
+        nextMonthBtn.onclick = () => changeMonth(1);
+    }
+}
+
+async function loadCalendarData(year, month) {
+    try {
+        console.log(`Loading calendar data for ${year}-${month}, service: ${calendarServiceId}`);
+
+        let response = await fetch(`/api/calendar-data/?service_id=${calendarServiceId}&year=${year}&month=${month}`);
+
+        if (!response.ok) {
+            response = await fetch(`/api/simple-calendar/?year=${year}&month=${month}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        renderCalendar(data);
+
+    } catch (error) {
+        console.error('Error loading calendar data:', error);
+        showFallbackCalendar(year, month);
+        showMessage('Используется упрощенный календарь', 'info');
+    }
+}
+
+function changeMonth(direction) {
+    calendarCurrentMonth += direction;
+
+    if (calendarCurrentMonth > 12) {
+        calendarCurrentMonth = 1;
+        calendarCurrentYear += 1;
+    } else if (calendarCurrentMonth < 1) {
+        calendarCurrentMonth = 12;
+        calendarCurrentYear -= 1;
+    }
+
+    loadCalendarData(calendarCurrentYear, calendarCurrentMonth);
+}
+
+function renderCalendar(data) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYearElement = document.getElementById('currentMonthYear');
+
+    if (!calendarGrid || !monthYearElement) return;
+
+    monthYearElement.textContent = `${data.month_name} ${data.year}`;
+    calendarGrid.innerHTML = '';
+
+    data.weeks.forEach(week => {
+        week.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+
+            if (!day.current_month) {
+                dayElement.classList.add('other-month');
+                dayElement.textContent = '';
+            } else if (day.available) {
+                dayElement.classList.add('available');
+                dayElement.textContent = day.day;
+
+                if (day.date === data.today) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.addEventListener('click', () => {
+                    selectDate(day.date, dayElement);
+                });
+            } else {
+                dayElement.classList.add('unavailable');
+                dayElement.textContent = day.day;
+                dayElement.title = 'Дата недоступна для записи';
+            }
+
+            calendarGrid.appendChild(dayElement);
+        });
+    });
+
+    const timeSelection = document.getElementById('timeSelection');
+    const selectedDateTime = document.getElementById('selectedDateTime');
+    const selectedDate = document.getElementById('selectedDate');
+
+    if (timeSelection) timeSelection.style.display = 'none';
+    if (selectedDateTime) selectedDateTime.value = '';
+    if (selectedDate) selectedDate.value = '';
+}
+
+async function selectDate(date, element) {
+    console.log(`Date selected: ${date}`);
+
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+
+    const selectedDateField = document.getElementById('selectedDate');
+    if (selectedDateField) selectedDateField.value = date;
+
+    await loadTimeSlots(date);
+}
+
+async function loadTimeSlots(date) {
+    try {
+        console.log(`Loading time slots for date: ${date}, service: ${calendarServiceId}`);
+
+        const response = await fetch(`/api/available-time/?date=${date}&service_id=${calendarServiceId}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Available slots:', data.slots);
+
+            renderTimeSlots(data.slots);
+            const timeSelection = document.getElementById('timeSelection');
+            if (timeSelection) timeSelection.style.display = 'block';
+
+        } else {
+            const errorData = await response.json();
+            console.error('Error loading time slots:', errorData);
+            showMessage('Ошибка загрузки доступного времени', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading time slots:', error);
+        showMessage('Ошибка загрузки доступного времени', 'error');
+    }
+}
+
+function renderTimeSlots(slots) {
+    const timeSlotsContainer = document.getElementById('timeSlots');
+    if (!timeSlotsContainer) return;
+
+    timeSlotsContainer.innerHTML = '';
+
+    if (slots.length === 0) {
+        timeSlotsContainer.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1 / -1;">Нет доступных слотов на выбранную дату</p>';
+        return;
+    }
+
+    slots.forEach(slot => {
+        const timeSlot = document.createElement('button');
+        timeSlot.type = 'button';
+        timeSlot.className = 'time-slot available';
+        timeSlot.textContent = slot.display;
+        timeSlot.dataset.datetime = slot.datetime;
+
+        timeSlot.addEventListener('click', () => {
+            selectTimeSlot(slot.datetime, timeSlot);
+        });
+
+        timeSlotsContainer.appendChild(timeSlot);
+    });
+}
+
+function selectTimeSlot(datetime, element) {
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+
+    const selectedDateTimeField = document.getElementById('selectedDateTime');
+    if (selectedDateTimeField) selectedDateTimeField.value = datetime;
+
+    const timeError = document.getElementById('time_error');
+    if (timeError) timeError.textContent = '';
+}
+
+function showFallbackCalendar(year, month) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYearElement = document.getElementById('currentMonthYear');
+
+    if (!calendarGrid || !monthYearElement) return;
+
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    monthYearElement.textContent = `${monthNames[month - 1]} ${year}`;
+    calendarGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 2rem;">Календарь временно недоступен</p>';
+}
+
+// Закрытие модального окна при клике вне его
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('bookingModal');
+    if (event.target === modal) {
+        closeBookingModal();
+    }
+});
+</script>
 </body>
 </html>
