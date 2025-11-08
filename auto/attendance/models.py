@@ -3,7 +3,7 @@ from django.db import models
 
 class Attendance(models.Model):
     tittle = models.CharField(max_length=50, verbose_name='Название')
-    description = models.TextField(max_length=1000, verbose_name='Описание')
+    description = models.TextField(max_length=5000, verbose_name='Описание')
     price = models.PositiveIntegerField(verbose_name='Цена')
     duration = models.DurationField(verbose_name='Длительность')
     is_active = models.BooleanField(default=True, verbose_name='Активна')
