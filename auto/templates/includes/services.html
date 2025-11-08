@@ -46,9 +46,10 @@
                     <h3 class="service-title">{{ service.tittle }}</h3>
 
                     <!-- Контейнер для описания с кнопкой разворачивания -->
+                    {% load service_filters %}
                     <div class="service-description-container">
                         <p class="service-description" id="description-{{ service.id }}">
-                            {{ service.description }}
+                            {{ service.description|format_service_description }}
                         </p>
                         {% if service.description|length > 150 %}
                         <button class="show-more-btn" data-service-id="{{ service.id }}">
