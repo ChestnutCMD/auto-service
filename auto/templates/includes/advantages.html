@@ -1,0 +1,27 @@
+<!-- templates/includes/advantages.html -->
+<section id="advantages" class="section bg-gradient-to-br from-gray-900 to-blue-900 text-white">
+    <div class="container">
+        <div class="section-header">
+            <h2>Почему выбирают нас?</h2>
+            <p class="section-description" style="color: #d1d5db;">
+                Мы заботимся о вашем автомобиле как о своем собственном
+            </p>
+        </div>
+
+        <div class="advantages-grid">
+            {% for advantage in company_info.ADVANTAGES %}
+            <div class="advantage-card">
+                <div class="advantage-icon">
+                    <i class="{{ advantage.icon }}"></i>
+                </div>
+                <h3 class="advantage-title">{{ advantage.title }}</h3>
+                <p class="advantage-description">{{ advantage.description }}</p>
+            </div>
+            {% empty %}
+            <div class="no-advantages">
+                <p>Преимущества скоро будут добавлены</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>

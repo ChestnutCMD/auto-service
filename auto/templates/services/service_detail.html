@@ -1,0 +1,362 @@
+<!-- templates/services/service_detail.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 2rem 0;">
+    <!-- Хлебные крошки -->
+    <nav style="margin-bottom: 2rem;">
+        <a href="{% url 'services_list' %}" style="color: #2563eb; text-decoration: none;">Главная</a>
+        <span style="margin: 0 0.5rem; color: #6b7280;">/</span>
+        <span style="color: #6b7280;">{{ service.tittle }}</span>
+    </nav>
+
+    <div class="service-detail">
+        <!-- Галерея фото -->
+        <div class="service-gallery" style="margin-bottom: 2rem; position: relative;">
+            {% if service.photos.all %}
+                <div class="main-photo" style="border-radius: 1rem; overflow: hidden; margin-bottom: 1rem; position: relative;">
+                    <img src="{{ service.photos.first.photo.url }}"
+                         alt="{{ service.tittle }}"
+                         style="width: 100%; height: 700px; object-fit: cover; transition: opacity 0.3s ease-in-out; cursor: pointer;"
+                         id="mainServicePhoto">
+
+                    {% if service.photos.count > 1 %}
+                    <!-- Кнопки навигации -->
+                    <div style="position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 1rem; transform: translateY(-50%);">
+                        <button type="button" class="photo-nav-btn" onclick="serviceGallery.prevPhoto()" style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="photo-nav-btn" onclick="serviceGallery.nextPhoto()" style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <!-- Счетчик -->
+                    <div style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem; backdrop-filter: blur(10px);">
+                        <span id="photoCounter">1</span>/{{ service.photos.count }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if service.photos.count > 1 %}
+                <div class="photo-thumbnails" style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0;">
+                    {% for photo in service.photos.all %}
+                    <img src="{{ photo.photo.url }}"
+                         alt="{{ service.tittle }}"
+                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; cursor: pointer; border: 2px solid transparent; transition: all 0.3s;"
+                         data-photo-index="{{ forloop.counter0 }}"
+                         data-photo-url="{{ photo.photo.url }}"
+                         class="photo-thumb"
+                         id="thumb-{{ forloop.counter0 }}">
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 1rem;">
+                    <i class="fas fa-tools" style="color: white; font-size: 4rem;"></i>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Информация об услуге -->
+        <div class="service-info">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">
+                {{ service.tittle }}
+            </h1>
+
+            <div class="service-meta" style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: #f0f9ff; padding: 0.75rem 1.5rem; border-radius: 2rem; border: 1px solid #bae6fd;">
+                    <i class="fas fa-tag" style="color: #2563eb;"></i>
+                    <span style="font-weight: 600; color: #0369a1; font-size: 1.25rem;">
+                        От {{ service.price }} ₽
+                    </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: #f3f4f6; padding: 0.75rem 1.5rem; border-radius: 2rem; border: 1px solid #e5e7eb;">
+                    <i class="fas fa-clock" style="color: #2563eb;"></i>
+                    <span style="font-weight: 500; color: #374151;">
+                        От {% if service.get_duration_display %}
+                            {{ service.get_duration_display }}
+                        {% else %}
+                            {{ service.duration }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Полное описание -->
+            <div class="service-description-full" style="margin-bottom: 3rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">
+                    Описание услуги
+                </h2>
+                <div style="line-height: 1.8; color: #4b5563; font-size: 1.1rem; background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #2563eb;">
+                    {{ service.description|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Кнопка записи -->
+            <div class="booking-section" style="background: #f8fafc; padding: 2rem; border-radius: 1rem; text-align: center; border: 1px solid #e5e7eb;">
+                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">
+                    Готовы записаться?
+                </h3>
+                <p style="color: #6b7280; margin-bottom: 2rem;">
+                    Выберите удобное время и наши специалисты свяжутся с вами для подтверждения записи
+                </p>
+                <button class="btn-primary book-service-btn"
+                        style="padding: 1rem 2rem; font-size: 1.1rem; border: none; border-radius: 0.75rem; cursor: pointer; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; font-weight: 600; transition: all 0.3s;"
+                        data-service-id="{{ service.id }}"
+                        data-service-name="{{ service.tittle }}"
+                        data-service-price="{{ service.price }}">
+                    <i class="fas fa-calendar-check"></i> Записаться онлайн
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Включаем модальное окно -->
+{% include 'includes/booking_modal.html' %}
+
+<!-- Включаем секцию преимуществ -->
+{% if company_info %}
+    {% include 'includes/advantages.html' %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+// Галерея фото как объект для избежания конфликтов
+const serviceGallery = {
+    currentPhotoIndex: 0,
+    servicePhotos: [
+        {% for photo in service.photos.all %}
+        "{{ photo.photo.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+
+    init: function() {
+        console.log('Service gallery initialized with', this.servicePhotos.length, 'photos');
+
+        // Добавляем обработчик клика на главную фотографию
+        const mainPhoto = document.getElementById('mainServicePhoto');
+        if (mainPhoto && this.servicePhotos.length > 1) {
+            mainPhoto.addEventListener('click', (e) => {
+                // Определяем, по какой части фото кликнули (левая/правая)
+                const rect = e.target.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+
+                // Если кликнули по левой части - предыдущее фото, по правой - следующее
+                if (clickX < width / 2) {
+                    this.prevPhoto();
+                } else {
+                    this.nextPhoto();
+                }
+            });
+
+            // Добавляем курсор-подсказку
+            mainPhoto.style.cursor = 'pointer';
+            mainPhoto.title = 'Кликните по левой или правой части для перелистывания';
+        }
+
+        // Добавляем обработчики для миниатюр
+        document.querySelectorAll('.photo-thumb').forEach(thumb => {
+            thumb.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-photo-index'));
+                const photoUrl = e.target.getAttribute('data-photo-url');
+                this.changeMainPhoto(photoUrl, index);
+            });
+
+            // Hover эффекты
+            thumb.addEventListener('mouseover', (e) => {
+                e.target.style.transform = 'scale(1.05)';
+            });
+
+            thumb.addEventListener('mouseout', (e) => {
+                e.target.style.transform = 'scale(1)';
+            });
+        });
+
+        this.updateThumbnailSelection();
+    },
+
+    // Смена главного фото
+    changeMainPhoto: function(photoUrl, index) {
+        const mainPhoto = document.getElementById('mainServicePhoto');
+        if (mainPhoto) {
+            // Анимация fade
+            mainPhoto.style.opacity = '0.7';
+            setTimeout(() => {
+                mainPhoto.src = photoUrl;
+                mainPhoto.style.opacity = '1';
+            }, 150);
+
+            this.currentPhotoIndex = index;
+            this.updatePhotoCounter();
+            this.updateThumbnailSelection();
+        }
+    },
+
+    // Следующее фото
+    nextPhoto: function() {
+        if (this.servicePhotos.length <= 1) return;
+        this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.servicePhotos.length;
+        this.changeMainPhoto(this.servicePhotos[this.currentPhotoIndex], this.currentPhotoIndex);
+    },
+
+    // Предыдущее фото
+    prevPhoto: function() {
+        if (this.servicePhotos.length <= 1) return;
+        this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.servicePhotos.length) % this.servicePhotos.length;
+        this.changeMainPhoto(this.servicePhotos[this.currentPhotoIndex], this.currentPhotoIndex);
+    },
+
+    // Обновление счетчика
+    updatePhotoCounter: function() {
+        const counter = document.getElementById('photoCounter');
+        if (counter) {
+            counter.textContent = this.currentPhotoIndex + 1;
+        }
+    },
+
+    // Обновление выделения миниатюр
+    updateThumbnailSelection: function() {
+        document.querySelectorAll('.photo-thumb').forEach((thumb, index) => {
+            if (index === this.currentPhotoIndex) {
+                thumb.style.borderColor = '#2563eb';
+                thumb.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.3)';
+            } else {
+                thumb.style.borderColor = 'transparent';
+                thumb.style.boxShadow = 'none';
+            }
+        });
+    }
+};
+
+// Глобальные функции для модального окна
+if (typeof window.openBookingModal === 'undefined') {
+    window.openBookingModal = function(serviceId, serviceName, servicePrice) {
+        const modal = document.getElementById('bookingModal');
+        const form = document.getElementById('bookingForm');
+        const serviceField = form ? form.querySelector('#id_attendance') : null;
+        const title = document.getElementById('bookingModalTitle');
+
+        console.log('Opening modal for service:', serviceId, serviceName, servicePrice);
+
+        // Устанавливаем ID услуги
+        if (serviceField) serviceField.value = serviceId;
+
+        // Обновляем заголовок
+        if (title) {
+            title.innerHTML = `<i class="fas fa-calendar-check"></i> ${serviceName} - ${servicePrice} ₽`;
+        }
+
+        // Сбрасываем форму
+        if (form) form.reset();
+
+        // Сбрасываем выбор времени
+        const timeSelection = document.getElementById('timeSelection');
+        const selectedDateTime = document.getElementById('selectedDateTime');
+        const selectedDate = document.getElementById('selectedDate');
+
+        if (timeSelection) timeSelection.style.display = 'none';
+        if (selectedDateTime) selectedDateTime.value = '';
+        if (selectedDate) selectedDate.value = '';
+
+        // Показываем модальное окно
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+}
+
+if (typeof window.closeBookingModal === 'undefined') {
+    window.closeBookingModal = function() {
+        const modal = document.getElementById('bookingModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    };
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Service detail page loaded');
+
+    // Инициализируем галерею
+    if (serviceGallery.servicePhotos.length > 0) {
+        serviceGallery.init();
+    }
+
+    // Открытие модального окна бронирования
+    const bookButtons = document.querySelectorAll('.book-service-btn');
+    console.log('Found book buttons:', bookButtons.length);
+
+    bookButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const serviceId = this.getAttribute('data-service-id');
+            const serviceName = this.getAttribute('data-service-name');
+            const servicePrice = this.getAttribute('data-service-price');
+
+            console.log('Button clicked:', serviceId, serviceName, servicePrice);
+
+            window.openBookingModal(serviceId, serviceName, servicePrice);
+        });
+    });
+
+    // Hover эффекты для кнопки записи
+    bookButtons.forEach(button => {
+        button.addEventListener('mouseover', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 10px 25px rgba(37, 99, 235, 0.3)';
+        });
+
+        button.addEventListener('mouseout', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'none';
+        });
+    });
+
+    // Закрытие модального окна при клике вне его
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                window.closeBookingModal();
+            }
+        });
+    }
+
+    // Обработка клавиш для навигации по фото
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            serviceGallery.prevPhoto();
+        } else if (e.key === 'ArrowRight') {
+            serviceGallery.nextPhoto();
+        }
+    });
+});
+
+// CSS для кнопок навигации
+const galleryStyles = `
+    .photo-nav-btn:hover {
+        background: rgba(0,0,0,0.9) !important;
+        transform: scale(1.1) !important;
+    }
+
+    #mainServicePhoto {
+        cursor: pointer !important;
+    }
+
+    #mainServicePhoto:hover {
+        filter: brightness(0.95);
+    }
+`;
+const styleSheet = document.createElement('style');
+styleSheet.textContent = galleryStyles;
+document.head.appendChild(styleSheet);
+</script>
+{% endblock %}

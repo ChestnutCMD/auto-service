@@ -10,7 +10,7 @@
 
         <div class="services-grid">
             {% for service in services %}
-            <div class="service-card">
+            <div class="service-card" onclick="window.location.href='{% url 'service_detail' service.id %}'" style="cursor: pointer; position: relative;">
                 <div class="service-image">
                     {% if service.photos.all %}
                         <img src="{{ service.photos.first.photo.url }}"
@@ -29,10 +29,10 @@
 
                     {% if service.photos.count > 1 %}
                     <div class="photo-nav">
-                        <button class="photo-nav-btn" onclick="prevPhoto({{ service.id }})">
+                        <button type="button" class="photo-nav-btn" onclick="event.stopPropagation(); prevPhoto({{ service.id }})" style="z-index: 10;">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button class="photo-nav-btn" onclick="nextPhoto({{ service.id }})">
+                        <button type="button" class="photo-nav-btn" onclick="event.stopPropagation(); nextPhoto({{ service.id }})" style="z-index: 10;">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -45,19 +45,15 @@
                 <div class="service-content">
                     <h3 class="service-title">{{ service.tittle }}</h3>
 
-                    <!-- Контейнер для описания с кнопкой разворачивания -->
-                    {% load service_filters %}
+                    <!-- Укороченное описание с кнопкой "Подробнее" -->
                     <div class="service-description-container">
-                        <p class="service-description" id="description-{{ service.id }}">
-                            {{ service.description|format_service_description }}
+                        <p class="service-description">
+                            {{ service.description|truncatewords:30 }}
                         </p>
-                        {% if service.description|length > 150 %}
-                        <button class="show-more-btn" data-service-id="{{ service.id }}">
-                            <span class="show-more-text">Показать полностью</span>
-                            <span class="show-less-text" style="display: none;">Скрыть</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        {% endif %}
+                        <a href="{% url 'service_detail' service.id %}" class="show-more-btn" onclick="event.stopPropagation()">
+                            <span>Подробнее об услуге</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
 
                     <div class="service-meta">
@@ -74,13 +70,17 @@
                     </div>
 
                     <button class="btn-primary book-service-btn"
-                            style="width: 100%; padding: 0.75rem; font-size: 1rem; justify-content: center;"
+                            style="width: 100%; padding: 0.75rem; font-size: 1rem; justify-content: center; position: relative; z-index: 5;"
                             data-service-id="{{ service.id }}"
                             data-service-name="{{ service.tittle }}"
-                            data-service-price="{{ service.price }}">
+                            data-service-price="{{ service.price }}"
+                            onclick="event.stopPropagation();">
                         <i class="fas fa-calendar-check"></i> Записаться онлайн
                     </button>
                 </div>
+
+                <!-- Наложение для hover эффекта -->
+                <div class="service-card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: transparent; transition: all 0.3s; pointer-events: none;"></div>
             </div>
             {% empty %}
             <div class="no-services">

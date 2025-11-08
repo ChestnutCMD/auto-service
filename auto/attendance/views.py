@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 import re
 
 from contacts.contacts import COMPANY_INFO
@@ -137,3 +137,35 @@ def is_working_time(start_time, duration):
                 end_time_only <= schedule.end_time)
     except WorkSchedule.DoesNotExist:
         return False
+
+
+def service_detail(request, service_id):
+    service = get_object_or_404(Attendance, id=service_id, is_active=True)
+
+    # Обработка формы бронирования на странице услуги
+    if request.method == 'POST':
+        form = ReservationForm(request.POST)
+        if form.is_valid():
+            try:
+                reservation = form.save(commit=False)
+
+                # Проверяем рабочее время
+                if not is_working_time(reservation.time, reservation.attendance.duration):
+                    messages.error(request, 'Выбранное время вне рабочего графика')
+                else:
+                    reservation.save()
+                    messages.success(request, 'Заявка успешно создана! Мы свяжемся с вами для подтверждения.')
+                    return redirect('service_detail', service_id=service_id)  # Оставайтесь на той же странице
+
+            except ValidationError as e:
+                messages.error(request, str(e))
+    else:
+        form = ReservationForm(initial={'attendance': service})
+
+    context = {
+        'service': service,
+        'form': form,
+        'title': f'{service.tittle} - {COMPANY_INFO["NAME"]}',
+        'company_info': COMPANY_INFO,
+    }
+    return render(request, 'services/service_detail.html', context)
