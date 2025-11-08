@@ -91,7 +91,7 @@
                                 <div style="position: absolute; top: 1rem; left: 1rem; background: rgba(37, 99, 235, 0.9); color: white; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; backdrop-filter: blur(10px);">
                                     <i class="fas fa-map-marker-alt"></i> {{ company_info.NAME }}
                                 </div>
-                            </a></a>
+                            </a>
                         </div>
                     </div>
 
@@ -214,6 +214,19 @@
         padding: 1.25rem !important;
     }
 }
+
+/* Стили для кликабельных ссылок в контактах */
+.contact-link {
+    color: #d1d5db !important;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    border-bottom: 1px dotted transparent;
+}
+
+.contact-item .contact-link {
+    display: inline-block;
+    padding: 0.125rem 0;
+}
 </style>
 
 <script>
@@ -230,6 +243,65 @@ function formatPhoneNumber(phone) {
     return phone;
 }
 
+// Функция для определения типа ссылки и создания кликабельного элемента
+function createClickableLink(value, icon) {
+    const cleanValue = value.trim();
+
+    // Телефон
+    if (icon === 'fas fa-phone') {
+        const formattedPhone = formatPhoneNumber(cleanValue);
+        return `<a href="tel:${cleanValue}" class="contact-link">${formattedPhone}</a>`;
+    }
+
+    // Email
+    else if (icon === 'fas fa-envelope') {
+        return `<a href="mailto:${cleanValue}" class="contact-link">${cleanValue}</a>`;
+    }
+
+    // Веб-сайт
+    else if (icon === 'fas fa-globe' || icon === 'fas fa-link') {
+        let url = cleanValue;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        // Укорачиваем отображаемый URL для красоты
+        const displayText = cleanValue.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+        return `<a href="${url}" target="_blank" class="contact-link">${displayText}</a>`;
+    }
+
+    // Социальные сети
+    else if (icon === 'fab fa-vk' || cleanValue.includes('vk.com')) {
+        let url = cleanValue;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        const displayText = cleanValue.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+        return `<a href="${url}" target="_blank" class="contact-link">${displayText}</a>`;
+    }
+
+    else if (icon === 'fab fa-telegram' || cleanValue.includes('t.me')) {
+        let url = cleanValue;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
+        const displayText = cleanValue.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+        return `<a href="${url}" target="_blank" class="contact-link">${displayText}</a>`;
+    }
+
+    else if (icon === 'fab fa-whatsapp') {
+        const phone = cleanValue.replace(/\D/g, '');
+        return `<a href="https://wa.me/${phone}" target="_blank" class="contact-link">${cleanValue}</a>`;
+    }
+
+    // Адрес (ссылка на карты)
+    else if (icon === 'fas fa-map-marker-alt') {
+        return `<a href="https://yandex.ru/maps/?text=${encodeURIComponent(cleanValue)}" target="_blank" class="contact-link">${cleanValue}</a>`;
+    }
+
+    // По умолчанию - обычный текст
+    return cleanValue;
+}
+
 // Функция для форматирования контактов после загрузки страницы
 document.addEventListener('DOMContentLoaded', function() {
     const contactValues = document.querySelectorAll('.contact-value');
@@ -238,11 +310,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const icon = element.getAttribute('data-icon');
         const value = element.getAttribute('data-value');
 
-        if (icon === 'fas fa-phone') {
-            const formattedPhone = formatPhoneNumber(value);
-            element.innerHTML = `<a href="tel:${value}" style="color: #d1d5db; text-decoration: none;">${formattedPhone}</a>`;
-        } else if (icon === 'fas fa-envelope') {
-            element.innerHTML = `<a href="mailto:${value}" style="color: #d1d5db; text-decoration: none;">${value}</a>`;
+        if (value) {
+            element.innerHTML = createClickableLink(value, icon);
         }
     });
 });

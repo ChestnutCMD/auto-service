@@ -9,6 +9,7 @@
     {% include 'includes/services.html' %}
 
     <!-- Секция преимуществ -->
+    <!-- Секция преимуществ -->
     <section id="advantages" class="section bg-gradient-to-br from-gray-900 to-blue-900 text-white">
         <div class="container">
             <div class="section-header">
@@ -19,7 +20,19 @@
             </div>
 
             <div class="advantages-grid">
-                <!-- Добавьте преимущества здесь -->
+                {% for advantage in company_info.ADVANTAGES %}
+                <div class="advantage-card">
+                    <div class="advantage-icon">
+                        <i class="{{ advantage.icon }}"></i>
+                    </div>
+                    <h3 class="advantage-title">{{ advantage.title }}</h3>
+                    <p class="advantage-description">{{ advantage.description }}</p>
+                </div>
+                {% empty %}
+                <div class="no-advantages">
+                    <p>Преимущества скоро будут добавлены</p>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </section>

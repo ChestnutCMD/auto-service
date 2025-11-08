@@ -1420,6 +1420,102 @@
         font-size: 0.75rem;
     }
 }
+    .logo a:hover {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.logo a:hover .logo-icon {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+        /* Стили для секции преимуществ */
+.advantages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.advantage-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.advantage-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.advantage-icon {
+    width: 4rem;
+    height: 4rem;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.advantage-card:hover .advantage-icon {
+    transform: scale(1.1);
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+}
+
+.advantage-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.advantage-description {
+    color: #d1d5db;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.no-advantages {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem;
+    color: #9ca3af;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .advantages-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .advantage-card {
+        padding: 1.5rem;
+    }
+
+    .advantage-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .advantage-card {
+        padding: 1.25rem;
+    }
+}
     </style>
 </head>
 <body>
