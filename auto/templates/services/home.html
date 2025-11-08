@@ -211,27 +211,7 @@ async function loadCalendarData(year, month) {
         showMessage('Используется упрощенный календарь', 'info');
     }
 }
-async function testAPI() {
-    try {
-        const response = await fetch('/api/test/');
-        const data = await response.json();
-        console.log('API test result:', data);
-        return data;
-    } catch (error) {
-        console.error('API test failed:', error);
-        return null;
-    }
-}
 
-// Вызов теста при загрузке (опционально)
-document.addEventListener('DOMContentLoaded', function() {
-    // ... существующий код ...
-
-    // Тестируем API при загрузке
-    setTimeout(() => {
-        testAPI();
-    }, 1000);
-});
 // Смена месяца
 function changeMonth(direction) {
     calendarCurrentMonth += direction;
