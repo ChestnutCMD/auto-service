@@ -1,18 +1,18 @@
 <!-- templates/services/service_detail.html -->
 {% extends 'base.html' %}
 {% load static %}
-
+{% load service_filters %}
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+
 <div class="container" style="padding: 2rem 0;">
     <!-- Хлебные крошки -->
     <nav style="margin-bottom: 2rem;">
         <a href="{% url 'services_list' %}" style="color: #2563eb; text-decoration: none;">Главная</a>
         <span style="margin: 0 0.5rem; color: #6b7280;">/</span>
-        <span style="color: #6b7280;">{{ service.tittle }}</span>
+        <span style="color: #6b7280;">{{service.tittle}}</span>
     </nav>
-
     <div class="service-detail">
         <!-- Галерея фото -->
         <div class="service-gallery" style="margin-bottom: 2rem; position: relative;">
@@ -20,33 +20,45 @@
                 <div class="main-photo" style="border-radius: 1rem; overflow: hidden; margin-bottom: 1rem; position: relative;">
                     <img src="{{ service.photos.first.photo.url }}"
                          alt="{{ service.tittle }}"
-                         style="width: 100%; height: 700px; object-fit: cover; transition: opacity 0.3s ease-in-out; cursor: pointer;"
-                         id="mainServicePhoto">
+                         style="width: 100%; height: auto; max-height: 70vh; object-fit: cover; transition: opacity 0.3s ease-in-out;"
+                         id="mainServicePhoto"
+                         class="service-main-photo">
 
                     {% if service.photos.count > 1 %}
                     <!-- Кнопки навигации -->
-                    <div style="position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 1rem; transform: translateY(-50%);">
-                        <button type="button" class="photo-nav-btn" onclick="serviceGallery.prevPhoto()" style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                    <div class="photo-nav-buttons" style="position: absolute; top: 50%; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 1rem; transform: translateY(-50%); z-index: 10;">
+                        <button type="button" class="photo-nav-btn prev-btn" onclick="serviceGallery.prevPhoto()"
+                                style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; backdrop-filter: blur(10px);">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button type="button" class="photo-nav-btn" onclick="serviceGallery.nextPhoto()" style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s;">
+                        <button type="button" class="photo-nav-btn next-btn" onclick="serviceGallery.nextPhoto()"
+                                style="width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; backdrop-filter: blur(10px);">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
 
                     <!-- Счетчик -->
-                    <div style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem; backdrop-filter: blur(10px);">
+                    <div class="photo-counter" style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: white; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem; backdrop-filter: blur(10px); z-index: 10;">
                         <span id="photoCounter">1</span>/{{ service.photos.count }}
+                    </div>
+
+                    <!-- Индикаторы точек для мобильных -->
+                    <div class="photo-dots" style="position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); display: none; gap: 0.5rem; z-index: 10; padding: 0.5rem;">
+                        {% for photo in service.photos.all %}
+                        <div class="photo-dot" data-photo-index="{{ forloop.counter0 }}"
+                             style="width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s;"></div>
+                        {% endfor %}
                     </div>
                     {% endif %}
                 </div>
 
                 {% if service.photos.count > 1 %}
-                <div class="photo-thumbnails" style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0;">
+                <!-- Миниатюры - только для десктопа -->
+                <div class="photo-thumbnails" style="display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.5rem 0; scrollbar-width: thin;">
                     {% for photo in service.photos.all %}
                     <img src="{{ photo.photo.url }}"
                          alt="{{ service.tittle }}"
-                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; cursor: pointer; border: 2px solid transparent; transition: all 0.3s;"
+                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; flex-shrink: 0;"
                          data-photo-index="{{ forloop.counter0 }}"
                          data-photo-url="{{ photo.photo.url }}"
                          class="photo-thumb"
@@ -55,23 +67,24 @@
                 </div>
                 {% endif %}
             {% else %}
-                <div style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 1rem;">
-                    <i class="fas fa-tools" style="color: white; font-size: 4rem;"></i>
+                <!-- Заглушка когда нет фото -->
+                <div style="width: 100%; height: 50vh; max-height: 400px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); border-radius: 1rem;">
+                    <i class="fas fa-tools" style="color: white; font-size: 3rem;"></i>
                 </div>
             {% endif %}
         </div>
 
-        <!-- Информация об услуге -->
+        <!-- Остальная часть контента -->
         <div class="service-info">
-            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">
-                {{ service.tittle }}
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">
+                {{service.tittle}}
             </h1>
 
-            <div class="service-meta" style="display: flex; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            <div class="service-meta" style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 0.5rem; background: #f0f9ff; padding: 0.75rem 1.5rem; border-radius: 2rem; border: 1px solid #bae6fd;">
                     <i class="fas fa-tag" style="color: #2563eb;"></i>
-                    <span style="font-weight: 600; color: #0369a1; font-size: 1.25rem;">
-                        От {{ service.price }} ₽
+                    <span style="font-weight: 600; color: #0369a1; font-size: 1.1rem;">
+                        От {{service.price}} ₽
                     </span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.5rem; background: #f3f4f6; padding: 0.75rem 1.5rem; border-radius: 2rem; border: 1px solid #e5e7eb;">
@@ -91,8 +104,8 @@
                 <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937;">
                     Описание услуги
                 </h2>
-                <div style="line-height: 1.8; color: #4b5563; font-size: 1.1rem; background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #2563eb;">
-                    {{ service.description|linebreaks }}
+                <div style="line-height: 1.8; color: #4b5563; font-size: 1rem; background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; border-left: 4px solid #2563eb;">
+                    {{ service.description|format_service_description }}
                 </div>
             </div>
 
@@ -105,7 +118,7 @@
                     Выберите удобное время и наши специалисты свяжутся с вами для подтверждения записи
                 </p>
                 <button class="btn-primary book-service-btn"
-                        style="padding: 1rem 2rem; font-size: 1.1rem; border: none; border-radius: 0.75rem; cursor: pointer; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; font-weight: 600; transition: all 0.3s;"
+                        style="padding: 1rem 2rem; font-size: 1.1rem; border: none; border-radius: 0.75rem; cursor: pointer; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; font-weight: 600; transition: all 0.3s; width: 100%; max-width: 300px;"
                         data-service-id="{{ service.id }}"
                         data-service-name="{{ service.tittle }}"
                         data-service-price="{{ service.price }}">
@@ -126,7 +139,8 @@
 {% endblock %}
 
 {% block scripts %}
-// Галерея фото как объект для избежания конфликтов
+
+// Адаптивная галерея фото
 const serviceGallery = {
     currentPhotoIndex: 0,
     servicePhotos: [
@@ -134,58 +148,143 @@ const serviceGallery = {
         "{{ photo.photo.url }}"{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
+    isMobile: window.innerWidth <= 768,
 
     init: function() {
         console.log('Service gallery initialized with', this.servicePhotos.length, 'photos');
+        this.detectViewport();
+        this.setupEventListeners();
+        this.updateUI();
+    },
 
-        // Добавляем обработчик клика на главную фотографию
+    detectViewport: function() {
+        this.isMobile = window.innerWidth <= 768;
+        console.log('Is mobile:', this.isMobile);
+    },
+
+    setupEventListeners: function() {
         const mainPhoto = document.getElementById('mainServicePhoto');
+
         if (mainPhoto && this.servicePhotos.length > 1) {
-            mainPhoto.addEventListener('click', (e) => {
-                // Определяем, по какой части фото кликнули (левая/правая)
-                const rect = e.target.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const width = rect.width;
+            if (!this.isMobile) {
+                mainPhoto.addEventListener('click', (e) => {
+                    const rect = e.target.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const width = rect.width;
 
-                // Если кликнули по левой части - предыдущее фото, по правой - следующее
-                if (clickX < width / 2) {
-                    this.prevPhoto();
-                } else {
-                    this.nextPhoto();
-                }
-            });
-
-            // Добавляем курсор-подсказку
-            mainPhoto.style.cursor = 'pointer';
-            mainPhoto.title = 'Кликните по левой или правой части для перелистывания';
+                    if (clickX < width / 2) {
+                        this.prevPhoto();
+                    } else {
+                        this.nextPhoto();
+                    }
+                });
+                mainPhoto.style.cursor = 'pointer';
+            } else {
+                mainPhoto.style.cursor = 'default';
+                this.setupSwipeGestures();
+            }
         }
 
-        // Добавляем обработчики для миниатюр
         document.querySelectorAll('.photo-thumb').forEach(thumb => {
             thumb.addEventListener('click', (e) => {
                 const index = parseInt(e.target.getAttribute('data-photo-index'));
-                const photoUrl = e.target.getAttribute('data-photo-url');
-                this.changeMainPhoto(photoUrl, index);
+                this.changeMainPhoto(this.servicePhotos[index], index);
             });
 
-            // Hover эффекты
-            thumb.addEventListener('mouseover', (e) => {
-                e.target.style.transform = 'scale(1.05)';
-            });
+            if (!this.isMobile) {
+                thumb.addEventListener('mouseover', (e) => {
+                    e.target.style.transform = 'scale(1.05)';
+                });
 
-            thumb.addEventListener('mouseout', (e) => {
-                e.target.style.transform = 'scale(1)';
+                thumb.addEventListener('mouseout', (e) => {
+                    e.target.style.transform = 'scale(1)';
+                });
+            }
+        });
+
+        document.querySelectorAll('.photo-dot').forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const index = parseInt(e.target.getAttribute('data-photo-index'));
+                this.changeMainPhoto(this.servicePhotos[index], index);
             });
         });
 
-        this.updateThumbnailSelection();
+        window.addEventListener('resize', () => {
+            const wasMobile = this.isMobile;
+            this.detectViewport();
+
+            if (wasMobile !== this.isMobile) {
+                this.updateUI();
+            }
+        });
     },
 
-    // Смена главного фото
+    updateUI: function() {
+        const thumbnails = document.querySelector('.photo-thumbnails');
+        const dots = document.querySelector('.photo-dots');
+        const mainPhoto = document.getElementById('mainServicePhoto');
+
+        if (this.isMobile) {
+            if (dots) dots.style.display = 'flex';
+            if (thumbnails) thumbnails.style.display = 'none';
+
+            document.querySelectorAll('.photo-nav-btn').forEach(btn => {
+                btn.style.width = '35px';
+                btn.style.height = '35px';
+                btn.style.fontSize = '0.8rem';
+            });
+
+            if (mainPhoto) mainPhoto.style.cursor = 'default';
+
+        } else {
+            if (dots) dots.style.display = 'none';
+            if (thumbnails && this.servicePhotos.length > 1) {
+                thumbnails.style.display = 'flex';
+            }
+
+            document.querySelectorAll('.photo-nav-btn').forEach(btn => {
+                btn.style.width = '40px';
+                btn.style.height = '40px';
+                btn.style.fontSize = '1rem';
+            });
+
+            if (mainPhoto && this.servicePhotos.length > 1) {
+                mainPhoto.style.cursor = 'pointer';
+            }
+        }
+
+        this.updateThumbnailSelection();
+        this.updateDotsSelection();
+    },
+
+    setupSwipeGestures: function() {
+        let startX = 0;
+        const mainPhoto = document.getElementById('mainServicePhoto');
+
+        if (!mainPhoto) return;
+
+        mainPhoto.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        mainPhoto.addEventListener('touchend', (e) => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            const swipeThreshold = 50;
+
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    this.nextPhoto();
+                } else {
+                    this.prevPhoto();
+                }
+            }
+        });
+    },
+
     changeMainPhoto: function(photoUrl, index) {
         const mainPhoto = document.getElementById('mainServicePhoto');
         if (mainPhoto) {
-            // Анимация fade
             mainPhoto.style.opacity = '0.7';
             setTimeout(() => {
                 mainPhoto.src = photoUrl;
@@ -195,24 +294,22 @@ const serviceGallery = {
             this.currentPhotoIndex = index;
             this.updatePhotoCounter();
             this.updateThumbnailSelection();
+            this.updateDotsSelection();
         }
     },
 
-    // Следующее фото
     nextPhoto: function() {
         if (this.servicePhotos.length <= 1) return;
         this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.servicePhotos.length;
         this.changeMainPhoto(this.servicePhotos[this.currentPhotoIndex], this.currentPhotoIndex);
     },
 
-    // Предыдущее фото
     prevPhoto: function() {
         if (this.servicePhotos.length <= 1) return;
         this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.servicePhotos.length) % this.servicePhotos.length;
         this.changeMainPhoto(this.servicePhotos[this.currentPhotoIndex], this.currentPhotoIndex);
     },
 
-    // Обновление счетчика
     updatePhotoCounter: function() {
         const counter = document.getElementById('photoCounter');
         if (counter) {
@@ -220,7 +317,6 @@ const serviceGallery = {
         }
     },
 
-    // Обновление выделения миниатюр
     updateThumbnailSelection: function() {
         document.querySelectorAll('.photo-thumb').forEach((thumb, index) => {
             if (index === this.currentPhotoIndex) {
@@ -231,9 +327,458 @@ const serviceGallery = {
                 thumb.style.boxShadow = 'none';
             }
         });
+    },
+
+    updateDotsSelection: function() {
+        document.querySelectorAll('.photo-dot').forEach((dot, index) => {
+            if (index === this.currentPhotoIndex) {
+                dot.style.background = 'rgba(255,255,255,0.9)';
+                dot.style.transform = 'scale(1.2)';
+            } else {
+                dot.style.background = 'rgba(255,255,255,0.5)';
+                dot.style.transform = 'scale(1)';
+            }
+        });
     }
 };
 
+// ФУНКЦИИ ДЛЯ ЗАПИСИ НА УСЛУГУ И КАЛЕНДАРЯ
+function initBooking() {
+    console.log('Initializing booking functionality...');
+
+    const bookButtons = document.querySelectorAll('.book-service-btn');
+    console.log('Found book buttons:', bookButtons.length);
+
+    bookButtons.forEach(button => {
+        // Удаляем старые обработчики чтобы избежать дублирования
+        button.replaceWith(button.cloneNode(true));
+    });
+
+    // Добавляем обработчики заново
+    document.querySelectorAll('.book-service-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const serviceId = this.getAttribute('data-service-id');
+            const serviceName = this.getAttribute('data-service-name');
+            const servicePrice = this.getAttribute('data-service-price');
+
+            console.log('Booking button clicked:', { serviceId, serviceName, servicePrice });
+
+            // Используем улучшенную функцию открытия модального окна
+            openBookingModalEnhanced(serviceId, serviceName, servicePrice);
+        });
+
+        // Hover эффекты только для десктопа
+        if (!serviceGallery.isMobile) {
+            button.addEventListener('mouseover', function() {
+                this.style.transform = 'translateY(-2px)';
+                this.style.boxShadow = '0 10px 25px rgba(37, 99, 235, 0.3)';
+            });
+
+            button.addEventListener('mouseout', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        }
+    });
+
+    // Инициализируем обработчики для модального окна
+    initModalHandlers();
+}
+
+// ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ МОДАЛЬНОГО ОКНА
+function initModalHandlers() {
+    console.log('Initializing modal handlers...');
+
+    const modal = document.getElementById('bookingModal');
+    const closeBtn = document.querySelector('.modal-close');
+    const cancelBtn = document.querySelector('.btn-secondary');
+
+    // Обработчик для кнопки закрытия
+    if (closeBtn) {
+        // Удаляем старый inline обработчик
+        closeBtn.removeAttribute('onclick');
+        closeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeBookingModalEnhanced();
+        });
+        console.log('Close button handler initialized');
+    }
+
+    // Обработчик для кнопки отмены
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeBookingModalEnhanced();
+        });
+        console.log('Cancel button handler initialized');
+    }
+
+    // Обработчик для клика вне модального окна
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeBookingModalEnhanced();
+            }
+        });
+        console.log('Backdrop click handler initialized');
+    }
+
+    // Обработчик для клавиши Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('bookingModal');
+            if (modal && modal.style.display === 'block') {
+                closeBookingModalEnhanced();
+            }
+        }
+    });
+    console.log('Escape key handler initialized');
+}
+
+// УЛУЧШЕННАЯ ФУНКЦИЯ ОТКРЫТИЯ МОДАЛЬНОГО ОКНА С КАЛЕНДАРЕМ
+function openBookingModalEnhanced(serviceId, serviceName, servicePrice) {
+    console.log('Opening booking modal for service:', serviceId);
+
+    const modal = document.getElementById('bookingModal');
+    const form = document.getElementById('bookingForm');
+    const serviceField = form ? form.querySelector('input[name="attendance"], #id_attendance') : null;
+    const title = document.getElementById('bookingModalTitle');
+
+    // Устанавливаем данные услуги
+    if (serviceField) {
+        serviceField.value = serviceId;
+        console.log('Service field set to:', serviceId);
+    } else {
+        console.warn('Service field not found in form');
+    }
+
+    if (title) {
+        title.innerHTML = `<i class="fas fa-calendar-check"></i> ${serviceName} - ${servicePrice} ₽`;
+    }
+
+    // Сбрасываем форму и выбор времени
+    if (form) {
+        form.reset();
+        console.log('Form reset');
+    }
+
+    const timeSelection = document.getElementById('timeSelection');
+    const selectedDateTime = document.getElementById('selectedDateTime');
+    const selectedDate = document.getElementById('selectedDate');
+
+    if (timeSelection) timeSelection.style.display = 'none';
+    if (selectedDateTime) selectedDateTime.value = '';
+    if (selectedDate) selectedDate.value = '';
+
+    // Сбрасываем выделение в календаре
+    document.querySelectorAll('.calendar-day.selected, .time-slot.selected').forEach(element => {
+        element.classList.remove('selected');
+    });
+
+    // ИНИЦИАЛИЗИРУЕМ КАЛЕНДАРЬ
+    initCalendarEnhanced(serviceId);
+
+    // Показываем модальное окно
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        console.log('Modal opened successfully');
+    } else {
+        console.error('Booking modal not found');
+    }
+}
+
+// УЛУЧШЕННАЯ ИНИЦИАЛИЗАЦИЯ КАЛЕНДАРЯ
+function initCalendarEnhanced(serviceId) {
+    console.log('Initializing calendar for service:', serviceId);
+
+    // Устанавливаем глобальные переменные для календаря
+    if (typeof window.calendarServiceId === 'undefined') {
+        window.calendarServiceId = serviceId;
+    } else {
+        window.calendarServiceId = serviceId;
+    }
+
+    if (typeof window.calendarCurrentYear === 'undefined') {
+        const now = new Date();
+        window.calendarCurrentYear = now.getFullYear();
+        window.calendarCurrentMonth = now.getMonth() + 1;
+    }
+
+    console.log('Calendar settings:', {
+        serviceId: window.calendarServiceId,
+        year: window.calendarCurrentYear,
+        month: window.calendarCurrentMonth
+    });
+
+    // Загружаем данные календаря
+    loadCalendarDataEnhanced(window.calendarCurrentYear, window.calendarCurrentMonth);
+
+    // Назначаем обработчики для кнопок навигации календаря
+    const prevMonthBtn = document.getElementById('prevMonth');
+    const nextMonthBtn = document.getElementById('nextMonth');
+
+    if (prevMonthBtn) {
+        prevMonthBtn.onclick = () => changeMonthEnhanced(-1);
+    }
+    if (nextMonthBtn) {
+        nextMonthBtn.onclick = () => changeMonthEnhanced(1);
+    }
+}
+
+// УЛУЧШЕННАЯ ЗАГРУЗКА ДАННЫХ КАЛЕНДАРЯ
+async function loadCalendarDataEnhanced(year, month) {
+    try {
+        console.log(`Loading calendar data for ${year}-${month}, service: ${window.calendarServiceId}`);
+
+        // Показываем индикатор загрузки
+        const calendarGrid = document.getElementById('calendarGrid');
+        if (calendarGrid) {
+            calendarGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280;">Загрузка календаря...</div>';
+        }
+
+        let response = await fetch(`/api/calendar-data/?service_id=${window.calendarServiceId}&year=${year}&month=${month}`);
+
+        if (!response.ok) {
+            console.log('Trying fallback API endpoint...');
+            response = await fetch(`/api/simple-calendar/?year=${year}&month=${month}`);
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Calendar data loaded:', data);
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        renderCalendarEnhanced(data);
+
+    } catch (error) {
+        console.error('Error loading calendar data:', error);
+        showFallbackCalendarEnhanced(year, month);
+        showMessage('Используется упрощенный календарь', 'info');
+    }
+}
+
+// УЛУЧШЕННЫЙ РЕНДЕРИНГ КАЛЕНДАРЯ
+function renderCalendarEnhanced(data) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYearElement = document.getElementById('currentMonthYear');
+
+    if (!calendarGrid || !monthYearElement) {
+        console.error('Calendar elements not found');
+        return;
+    }
+
+    monthYearElement.textContent = `${data.month_name} ${data.year}`;
+    calendarGrid.innerHTML = '';
+
+    if (!data.weeks || data.weeks.length === 0) {
+        calendarGrid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6b7280;">Нет данных для отображения</div>';
+        return;
+    }
+
+    data.weeks.forEach(week => {
+        week.forEach(day => {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+
+            if (!day.current_month) {
+                dayElement.classList.add('other-month');
+                dayElement.textContent = '';
+            } else if (day.available) {
+                dayElement.classList.add('available');
+                dayElement.textContent = day.day;
+
+                if (day.date === data.today) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.addEventListener('click', () => {
+                    selectDateEnhanced(day.date, dayElement);
+                });
+            } else {
+                dayElement.classList.add('unavailable');
+                dayElement.textContent = day.day;
+                dayElement.title = 'Дата недоступна для записи';
+            }
+
+            calendarGrid.appendChild(dayElement);
+        });
+    });
+
+    console.log('Calendar rendered successfully');
+}
+
+// УЛУЧШЕННЫЙ ВЫБОР ДАТЫ
+async function selectDateEnhanced(date, element) {
+    console.log(`Date selected: ${date}`);
+
+    // Сбрасываем предыдущее выделение
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+
+    const selectedDateField = document.getElementById('selectedDate');
+    if (selectedDateField) selectedDateField.value = date;
+
+    // Загружаем доступное время
+    await loadTimeSlotsEnhanced(date);
+}
+
+// УЛУЧШЕННАЯ ЗАГРУЗКА ВРЕМЕНИ
+async function loadTimeSlotsEnhanced(date) {
+    try {
+        console.log(`Loading time slots for date: ${date}, service: ${window.calendarServiceId}`);
+
+        const response = await fetch(`/api/available-time/?date=${date}&service_id=${window.calendarServiceId}`);
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Available slots:', data.slots);
+
+            renderTimeSlotsEnhanced(data.slots);
+            const timeSelection = document.getElementById('timeSelection');
+            if (timeSelection) timeSelection.style.display = 'block';
+
+        } else {
+            const errorData = await response.json();
+            console.error('Error loading time slots:', errorData);
+            showMessage('Ошибка загрузки доступного времени', 'error');
+        }
+    } catch (error) {
+        console.error('Error loading time slots:', error);
+        showMessage('Ошибка загрузки доступного времени', 'error');
+    }
+}
+
+// УЛУЧШЕННЫЙ РЕНДЕРИНГ ВРЕМЕНИ
+function renderTimeSlotsEnhanced(slots) {
+    const timeSlotsContainer = document.getElementById('timeSlots');
+    if (!timeSlotsContainer) return;
+
+    timeSlotsContainer.innerHTML = '';
+
+    if (!slots || slots.length === 0) {
+        timeSlotsContainer.innerHTML = '<p style="color: #6b7280; text-align: center; grid-column: 1 / -1; padding: 1rem;">Нет доступных слотов на выбранную дату</p>';
+        return;
+    }
+
+    slots.forEach(slot => {
+        const timeSlot = document.createElement('button');
+        timeSlot.type = 'button';
+        timeSlot.className = 'time-slot available';
+        timeSlot.textContent = slot.display;
+        timeSlot.dataset.datetime = slot.datetime;
+
+        timeSlot.addEventListener('click', () => {
+            selectTimeSlotEnhanced(slot.datetime, timeSlot);
+        });
+
+        timeSlotsContainer.appendChild(timeSlot);
+    });
+}
+
+// УЛУЧШЕННЫЙ ВЫБОР ВРЕМЕНИ
+function selectTimeSlotEnhanced(datetime, element) {
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+
+    element.classList.add('selected');
+
+    const selectedDateTimeField = document.getElementById('selectedDateTime');
+    if (selectedDateTimeField) selectedDateTimeField.value = datetime;
+
+    const timeError = document.getElementById('time_error');
+    if (timeError) timeError.textContent = '';
+}
+
+// УЛУЧШЕННОЕ ПЕРЕКЛЮЧЕНИЕ МЕСЯЦЕВ
+function changeMonthEnhanced(direction) {
+    window.calendarCurrentMonth += direction;
+
+    if (window.calendarCurrentMonth > 12) {
+        window.calendarCurrentMonth = 1;
+        window.calendarCurrentYear += 1;
+    } else if (window.calendarCurrentMonth < 1) {
+        window.calendarCurrentMonth = 12;
+        window.calendarCurrentYear -= 1;
+    }
+
+    loadCalendarDataEnhanced(window.calendarCurrentYear, window.calendarCurrentMonth);
+}
+
+// УЛУЧШЕННЫЙ ФОЛБЭК КАЛЕНДАРЯ
+function showFallbackCalendarEnhanced(year, month) {
+    const calendarGrid = document.getElementById('calendarGrid');
+    const monthYearElement = document.getElementById('currentMonthYear');
+
+    if (!calendarGrid || !monthYearElement) return;
+
+    const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    monthYearElement.textContent = `${monthNames[month - 1]} ${year}`;
+    calendarGrid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: #6b7280; padding: 2rem;">Календарь временно недоступен</p>';
+}
+
+// УЛУЧШЕННОЕ ЗАКРЫТИЕ МОДАЛЬНОГО ОКНА
+function closeBookingModalEnhanced() {
+    const modal = document.getElementById('bookingModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        console.log('Modal closed');
+    }
+}
+
+// ФУНКЦИЯ ПОКАЗА СООБЩЕНИЙ
+function showMessage(text, type) {
+    const container = document.querySelector('.messages-container') || createMessagesContainer();
+    const message = document.createElement('div');
+    message.className = `alert alert-${type}`;
+    message.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+            ${text}
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+
+    container.appendChild(message);
+
+    setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => {
+            if (message.parentElement) {
+                message.parentElement.removeChild(message);
+            }
+        }, 300);
+    }, 5000);
+}
+
+function createMessagesContainer() {
+    const container = document.createElement('div');
+    container.className = 'messages-container';
+    document.body.appendChild(container);
+    return container;
+}
+
+// СДЕЛАЕМ ФУНКЦИИ ГЛОБАЛЬНЫМИ ДЛЯ СОВМЕСТИМОСТИ
+window.openBookingModal = openBookingModalEnhanced;
+window.closeBookingModal = closeBookingModalEnhanced;
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
@@ -244,44 +789,8 @@ document.addEventListener('DOMContentLoaded', function() {
         serviceGallery.init();
     }
 
-    // Открытие модального окна бронирования
-    const bookButtons = document.querySelectorAll('.book-service-btn');
-    console.log('Found book buttons:', bookButtons.length);
-
-    bookButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const serviceId = this.getAttribute('data-service-id');
-            const serviceName = this.getAttribute('data-service-name');
-            const servicePrice = this.getAttribute('data-service-price');
-
-            console.log('Button clicked:', serviceId, serviceName, servicePrice);
-
-            window.openBookingModal(serviceId, serviceName, servicePrice);
-        });
-    });
-
-    // Hover эффекты для кнопки записи
-    bookButtons.forEach(button => {
-        button.addEventListener('mouseover', function() {
-            this.style.transform = 'translateY(-2px)';
-            this.style.boxShadow = '0 10px 25px rgba(37, 99, 235, 0.3)';
-        });
-
-        button.addEventListener('mouseout', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
-        });
-    });
-
-    // Закрытие модального окна при клике вне его
-    const modal = document.getElementById('bookingModal');
-    if (modal) {
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                window.closeBookingModal();
-            }
-        });
-    }
+    // Инициализируем функциональность записи
+    initBooking();
 
     // Обработка клавиш для навигации по фото
     document.addEventListener('keydown', function(e) {
@@ -291,25 +800,118 @@ document.addEventListener('DOMContentLoaded', function() {
             serviceGallery.nextPhoto();
         }
     });
+
+    // Дебаг информация
+    console.log('Global functions available:', {
+        openBookingModal: typeof window.openBookingModal,
+        closeBookingModal: typeof window.closeBookingModal,
+        calendarServiceId: typeof window.calendarServiceId
+    });
 });
 
-// CSS для кнопок навигации
+// CSS для адаптивной галереи
 const galleryStyles = `
+    .service-main-photo {
+        transition: all 0.3s ease !important;
+    }
+
+    .photo-nav-btn {
+        opacity: 0.9;
+        transition: all 0.3s ease !important;
+    }
+
     .photo-nav-btn:hover {
         background: rgba(0,0,0,0.9) !important;
         transform: scale(1.1) !important;
+        opacity: 1;
     }
 
-    #mainServicePhoto {
-        cursor: pointer !important;
+    .photo-dot:hover {
+        background: rgba(255,255,255,0.8) !important;
+        transform: scale(1.1) !important;
     }
 
-    #mainServicePhoto:hover {
-        filter: brightness(0.95);
+    /* Адаптивность для очень маленьких экранов */
+    @media (max-width: 480px) {
+        .photo-nav-btn {
+            width: 30px !important;
+            height: 30px !important;
+            font-size: 0.7rem !important;
+        }
+
+        .photo-counter {
+            font-size: 0.75rem !important;
+            padding: 0.375rem 0.75rem !important;
+        }
+
+        .photo-dot {
+            width: 6px !important;
+            height: 6px !important;
+        }
+
+        .photo-thumbnails {
+            display: none !important;
+        }
+    }
+
+    /* Десктопные стили */
+    @media (min-width: 769px) {
+        .photo-dots {
+            display: none !important;
+        }
+
+        .main-photo:hover .photo-nav-btn {
+            opacity: 1;
+        }
+
+        .photo-nav-btn {
+            opacity: 0.7;
+        }
+    }
+
+    /* Плавная анимация */
+    .photo-thumb, .photo-dot, .photo-nav-btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .photo-thumbnails {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+
+    .service-gallery {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Стили для кнопки записи */
+    .book-service-btn {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .book-service-btn:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Стили для календаря */
+    .calendar-day.available {
+        cursor: pointer;
+    }
+
+    .calendar-day.unavailable {
+        cursor: not-allowed;
+    }
+
+    .time-slot.available {
+        cursor: pointer;
     }
 `;
+
+// Добавляем стили в документ
 const styleSheet = document.createElement('style');
 styleSheet.textContent = galleryStyles;
 document.head.appendChild(styleSheet);
-</script>
 {% endblock %}
