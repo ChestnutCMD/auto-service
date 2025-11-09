@@ -4,8 +4,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}🚗 Профессиональный автосервис{% endblock %}</title>
+        <!-- Динамический title -->
+    <title>{% block title %}Ремонт вмятин без покраски в Ханты-Мансийске | PDR технология{% endblock %}</title>
 
+    <!-- Динамическое описание -->
+    <meta name="description" content="{% block meta_description %}Профессиональный ремонт вмятин без покраски в Ханты-Мансийске. Технология PDR. Выездной сервис. Гарантия качества. ☎ +7 (3467) XXX-XX-XX{% endblock %}">
+
+    <!-- Ключевые слова -->
+    <meta name="keywords" content="{% block meta_keywords %}ремонт вмятин без покраски Ханты-Мансийск, удаление вмятин, PDR, кузовной ремонт, выездной ремонт{% endblock %}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}Ремонт вмятин без покраски в Ханты-Мансийске | PDR технология{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Профессиональный ремонт вмятин без покраски в Ханты-Мансийске. Сохраняем заводскую покраску. Гарантия качества.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}https://ваш-сайт.ru/static/images/og-image.jpg{% endblock %}">
+    <meta property="og:url" content="https://ваш-сайт.ru{% block og_url %}{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="ru_RU">
+
+    <!-- Структурированные данные (общие для всего сайта) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "AutoBodyShop",
+        "name": "Профессиональный ремонт вмятин без покраски в Ханты-Мансийске",
+        "description": "Специализированный сервис по ремонту вмятин без покраски и кузовному ремонту в Ханты-Мансийске",
+        "url": "https://vmyata-hm.ru",
+        "telephone": "+79088801909",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Ханты-Мансийск",
+            "postalCode": "628000",
+            "streetAddress": "ул. Ермака 1 Б"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "61.003",
+            "longitude": "69.019"
+        },
+        "openingHours": [
+            "Mo-Fr 09:00-20:00",
+            "Sa 10:00-18:00",
+            "Su 10:00-18:00"
+        ],
+        "priceRange": "₽₽",
+        "areaServed": "Ханты-Мансийск и ХМАО"
+    }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -1518,6 +1562,117 @@
         padding: 1.25rem;
     }
 }
+        .custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.select-selected {
+    padding: 0.75rem 1rem;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.select-selected:hover {
+    border-color: #d1d5db;
+}
+
+.select-selected.active {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.select-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.select-text {
+    flex: 1;
+}
+
+.select-arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    color: #6b7280;
+}
+
+.select-selected.active .select-arrow {
+    transform: rotate(180deg);
+    color: #2563eb;
+}
+
+.select-items {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    margin-top: 0.25rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+}
+
+.select-items.show {
+    display: block;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.select-option {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.select-option:last-child {
+    border-bottom: none;
+}
+
+.select-option:hover {
+    background: #f8fafc;
+}
+
+.select-option.selected {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    color: white;
+}
+
+.select-option.selected .option-icon {
+    color: white !important;
+}
+
+.option-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
     </style>
 </head>
 <body>
@@ -1556,7 +1711,58 @@
     <script>
         {% block scripts %}
         {% endblock %}
+document.addEventListener('DOMContentLoaded', function() {
+    const customSelects = document.querySelectorAll('.custom-select');
 
+    customSelects.forEach(select => {
+        const selected = select.querySelector('.select-selected');
+        const items = select.querySelector('.select-items');
+        const options = select.querySelectorAll('.select-option');
+        const hiddenInput = select.querySelector('input[type="hidden"]');
+
+        // Обработчик клика на выбранный элемент
+        selected.addEventListener('click', function(e) {
+            e.stopPropagation();
+            items.classList.toggle('show');
+            selected.classList.toggle('active');
+        });
+
+        // Обработчики для опций
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                const icon = this.querySelector('.option-icon').cloneNode(true);
+                const text = this.querySelector('span').textContent;
+
+                // Обновляем выбранное значение
+                hiddenInput.value = value;
+
+                // Обновляем отображаемый элемент
+                const selectedIcon = selected.querySelector('.select-icon');
+                const selectedText = selected.querySelector('.select-text');
+
+                selectedIcon.className = icon.className + ' select-icon';
+                selectedIcon.style.cssText = icon.style.cssText;
+                selectedText.textContent = text;
+
+                // Снимаем выделение со всех опций
+                options.forEach(opt => opt.classList.remove('selected'));
+                // Выделяем текущую опцию
+                this.classList.add('selected');
+
+                // Закрываем выпадающий список
+                items.classList.remove('show');
+                selected.classList.remove('active');
+            });
+        });
+
+        // Закрытие при клике вне элемента
+        document.addEventListener('click', function() {
+            items.classList.remove('show');
+            selected.classList.remove('active');
+        });
+    });
+});
 // Глобальные переменные и функции для всего сайта
 const servicePhotos = {};
 let calendarCurrentYear = new Date().getFullYear();
