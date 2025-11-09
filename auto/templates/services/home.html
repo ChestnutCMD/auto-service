@@ -8,17 +8,9 @@
     {% include 'includes/hero.html' %}
     {% include 'includes/services.html' %}
     {% include 'includes/advantages.html' %}
-
 {% endblock %}
 
 {% block scripts %}
-// Глобальный объект для хранения данных о фото
-const servicePhotos = {};
-
-// Глобальные переменные для календаря
-let calendarCurrentYear = new Date().getFullYear();
-let calendarCurrentMonth = new Date().getMonth() + 1;
-let calendarServiceId = null;
 
 // Функция для плавной прокрутки к контактам
 function scrollToContacts() {
@@ -466,82 +458,77 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработка отправки формы бронирования
     const bookingForm = document.getElementById('bookingForm');
-if (bookingForm) {
-    bookingForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    if (bookingForm) {
+        bookingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        // Очищаем предыдущие ошибки
-        document.querySelectorAll('.form-error').forEach(error => {
-            error.textContent = '';
-        });
+            // Очищаем предыдущие ошибки
+            document.querySelectorAll('.form-error').forEach(error => {
+                error.textContent = '';
+            });
 
-        // Проверяем, что время выбрано
-        const selectedDateTime = document.getElementById('selectedDateTime');
-        if (selectedDateTime && !selectedDateTime.value) {
-            const timeError = document.getElementById('time_error');
-            if (timeError) {
-                timeError.textContent = 'Пожалуйста, выберите дату и время';
+            // Проверяем, что время выбрано
+            const selectedDateTime = document.getElementById('selectedDateTime');
+            if (selectedDateTime && !selectedDateTime.value) {
+                const timeError = document.getElementById('time_error');
+                if (timeError) {
+                    timeError.textContent = 'Пожалуйста, выберите дату и время';
+                }
+                return;
             }
-            return;
-        }
 
-        const formData = new FormData(this);
-        const selectedTime = document.getElementById('selectedDateTime').value;
+            const formData = new FormData(this);
 
-        fetch('', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                closeBookingModal();
-                showMessage(data.message, 'success');
-                bookingForm.reset();
+            fetch('', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeBookingModal();
+                    showMessage(data.message, 'success');
+                    bookingForm.reset();
 
-            } else {
-                // Показываем ошибки
-                if (data.errors) {
-                    Object.keys(data.errors).forEach(field => {
-                        const errorElement = document.getElementById(field + '_error');
-                        if (errorElement) {
-                            errorElement.textContent = data.errors[field][0]?.message || data.errors[field][0];
-                        }
-                    });
+                } else {
+                    // Показываем ошибки
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            const errorElement = document.getElementById(field + '_error');
+                            if (errorElement) {
+                                errorElement.textContent = data.errors[field][0]?.message || data.errors[field][0];
+                            }
+                        });
 
-                    // Если ошибка связана со временем, перезагружаем слоты
-                    if (data.errors.time) {
-                        const selectedDate = document.getElementById('selectedDate').value;
-                        if (selectedDate) {
-                            loadTimeSlots(selectedDate);
+                        // Если ошибка связана со временем, перезагружаем слоты
+                        if (data.errors.time) {
+                            const selectedDate = document.getElementById('selectedDate').value;
+                            if (selectedDate) {
+                                loadTimeSlots(selectedDate);
+                            }
                         }
                     }
+                    if (data.message) {
+                        showMessage(data.message, 'error');
+                    }
                 }
-                if (data.message) {
-                    showMessage(data.message, 'error');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('Произошла ошибка при отправке формы', 'error');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Произошла ошибка при отправке формы', 'error');
+            });
         });
-    });
-}
+    }
 
-// Загружаем занятые слоты при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
-    // ... существующий код ...
-
-    // Загружаем занятые слоты
+    // Загружаем занятые слоты при загрузке страницы
     loadBookedSlots();
 
     // Периодически обновляем занятые слоты (каждые 30 секунд)
     setInterval(loadBookedSlots, 30000);
-});
+
     // Автоматическое скрытие системных сообщений Django
     const messages = document.querySelectorAll('.alert');
     messages.forEach(message => {
@@ -607,7 +594,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Обработчики для кнопок показа описания
+    const showMoreButtons = document.querySelectorAll('.show-more-btn');
+    showMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const serviceId = this.getAttribute('data-service-id');
+            toggleServiceDescription(serviceId);
+        });
+    });
 });
+
 // Функция для разворачивания/скрытия описания
 function toggleServiceDescription(serviceId) {
     const description = document.getElementById(`description-${serviceId}`);
@@ -631,19 +628,6 @@ function toggleServiceDescription(serviceId) {
     }
 }
 
-// Инициализация при загрузке DOM
-document.addEventListener('DOMContentLoaded', function() {
-    // ... существующий код ...
-
-    // Обработчики для кнопок показа описания
-    const showMoreButtons = document.querySelectorAll('.show-more-btn');
-    showMoreButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const serviceId = this.getAttribute('data-service-id');
-            toggleServiceDescription(serviceId);
-        });
-    });
-});
 // Закрытие модального окна при клике вне его
 window.addEventListener('click', function(event) {
     const modal = document.getElementById('bookingModal');

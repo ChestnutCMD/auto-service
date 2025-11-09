@@ -61,8 +61,7 @@ def format_reservation_message(reservation):
         f"<b>Клиент:</b> {reservation.name}\n"
         f"<b>Телефон:</b> <code>{reservation.phone}</code>\n"
         f"<b>Способ связи:</b> {communication}\n"
-        f"<b>Заявка создана:</b> {created_at_str}\n"
-        f"<b>Статус:</b> {reservation.get_status_display()}"
+        f"<b>Время:</b> {time_str}\n"
     )
 
     return message

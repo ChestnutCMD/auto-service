@@ -4,6 +4,35 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+<style>
+/* Стили для адаптивности заголовков в политике конфиденциальности */
+@media (max-width: 768px) {
+    .hero-title .desktop-text {
+        display: none;
+    }
+
+    .hero-title .mobile-text {
+        display: block;
+        font-size: 2.25rem !important;
+        line-height: 1.3;
+        color: #1f2937;
+    }
+
+    .privacy-content h2 {
+        font-size: 1.75rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title .mobile-text {
+        font-size: 2rem !important;
+    }
+
+    .privacy-content h2 {
+        font-size: 1.5rem !important;
+    }
+}
+</style>
 <section class="section section-white">
     <div class="container">
         <div class="section-header">
@@ -21,7 +50,7 @@
             <div class="privacy-section" style="margin-bottom: 2rem;">
                 <h2 style="color: #2563eb; margin-bottom: 1rem;">1. Общие положения</h2>
                 <p style="margin-bottom: 1rem;">
-                    Автосервис "{{ company_info.NAME }}" уважает вашу конфиденциальность и обязуется защищать
+                    Автосервис "{{company_info.NAME}}" уважает вашу конфиденциальность и обязуется защищать
                     ваши персональные данные. Настоящая Политика конфиденциальности описывает, как мы собираем,
                     используем и защищаем информацию о вас.
                 </p>
