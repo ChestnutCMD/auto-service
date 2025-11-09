@@ -48,3 +48,43 @@ def get_contact_value_by_icon(contacts, icon_name):
     """Возвращает значение контакта по иконке"""
     contact = get_contact_by_icon(contacts, icon_name)
     return contact.value if contact else ""
+
+
+@register.filter
+@stringfilter
+def format_schedule(value):
+    """Форматирует график работы с разными разделителями"""
+    if not value:
+        return value
+
+    # Убираем лишние пробелы
+    value = value.strip()
+
+    # Если уже есть HTML теги, возвращаем как есть
+    if '<br>' in value or '<p>' in value:
+        return value
+
+    # Разные варианты разделителей
+    if ';' in value:
+        # Обрабатываем "Пн-Пт: 9:00-20:00 ; Сб-Вс: 10:00-18:00"
+        parts = [part.strip() for part in value.split(';') if part.strip()]
+        return '<br>'.join(parts)
+
+    elif ',' in value:
+        # Обрабатываем запятые
+        parts = [part.strip() for part in value.split(',') if part.strip()]
+        return '<br>'.join(parts)
+
+    elif '|' in value:
+        # Обрабатываем вертикальную черту
+        parts = [part.strip() for part in value.split('|') if part.strip()]
+        return '<br>'.join(parts)
+
+    # Если нет разделителей, пытаемся разбить по паттерну
+    schedule_pattern = r'([А-Яа-яёЁ\-\d]+:\s*\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2})'
+    matches = re.findall(schedule_pattern, value)
+    if matches:
+        return '<br>'.join(match.strip() for match in matches)
+
+    # Если ничего не подошло, возвращаем как есть
+    return value

@@ -2,7 +2,17 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load service_filters %}
-{% block title %}{{ title }}{% endblock %}
+{% block title %}{{ service.title }} в Ханты-Мансийске | Цена от {{ service.price }} руб.{% endblock %}
+
+{% block meta_description %}{{ service.title }} в Ханты-Мансийске от {{ service.price }} руб. {{ service.description|truncatewords:20 }} Запись онлайн. Гарантия качества.{% endblock %}
+
+{% block meta_keywords %}{{ service.title }} Ханты-Мансийск, цена от {{ service.title|lower }}, {{ service.title|lower }} стоимость ХМАО{% endblock %}
+
+{% block og_title %}{{ service.title }} в Ханты-Мансийске | {{ service.price }} руб.{% endblock %}
+
+{% block og_description %}{{ service.title }} в Ханты-Мансийске профессионально и недорого. Всего от {{ service.price }} руб. Гарантия качества.{% endblock %}
+
+{% block og_url %}{{ request.path }}{% endblock %}
 
 {% block content %}
 
@@ -128,7 +138,37 @@
         </div>
     </div>
 </div>
-
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "{{ service.title }}",
+    "description": "{{ service.description|striptags|truncatewords:30 }}",
+    "provider": {
+        "@type": "AutoBodyShop",
+        "name": "Автосервис в Ханты-Мансийске",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Ханты-Мансийск",
+            "streetAddress": "ул. Ермака 1 Б"
+        }
+    },
+    "areaServed": "Ханты-Мансийск",
+    "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Услуги автосервиса",
+        "itemListElement": {
+            "@type": "Offer",
+            "itemOffered": {
+                "@type": "Service",
+                "name": "{{ service.title }}"
+            },
+            "price": "{{ service.price }}",
+            "priceCurrency": "RUB"
+        }
+    }
+}
+</script>
 <!-- Включаем модальное окно -->
 {% include 'includes/booking_modal.html' %}
 
