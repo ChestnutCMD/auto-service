@@ -1,8 +1,8 @@
 COMPANY_INFO = {
-    'NAME': 'ВМЯТА-ХМ',
-    'FULL_NAME': 'ВМЯТА-ХМ',
+    'NAME': 'АвтоИмперия',
+    'FULL_NAME': 'АвтоИмперия',
     'DESCRIPTION': 'Профессиональный автосервис',
-    'DEFAULT_ADDRESS': 'г. Ханты-Мансийск, ул. Ермака 1 Б',
+    'DEFAULT_ADDRESS': 'г. Уфа, ул. Пугачева 252',
     'ADVANTAGES': [
             {
                 'icon': 'fas fa-award',
