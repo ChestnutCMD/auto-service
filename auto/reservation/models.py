@@ -5,7 +5,8 @@ from django.db import models
 from django.utils import timezone
 
 from attendance.models import Attendance
-
+from .email_utils import send_email_notification
+from .telegram_utils import send_telegram_notification
 
 class Reservations(models.Model):
     COMMUNICATION_CHOICES = (
@@ -63,12 +64,13 @@ class Reservations(models.Model):
         Отправляет уведомление о создании новой заявки
         """
         try:
-            from .telegram_utils import send_telegram_notification
             send_telegram_notification(self)
         except Exception as e:
-            # Логируем ошибку, но не прерываем сохранение
             print(f"Failed to send Telegram notification: {e}")
-
+        try:
+            send_email_notification(self)
+        except Exception as e:
+            print(f"Failed to send Email notification: {e}")
 
 class WorkSchedule(models.Model):
     DAYS_OF_WEEK = (
