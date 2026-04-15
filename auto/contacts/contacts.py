@@ -1,7 +1,7 @@
 COMPANY_INFO = {
     'NAME': 'АвтоИмперия',
     'FULL_NAME': 'АвтоИмперия',
-    'DESCRIPTION': 'Профессиональный автосервис',
+    'DESCRIPTION': 'Детейлинг центр',
     'DEFAULT_ADDRESS': 'г. Уфа, ул. Пугачева 252',
     'ADVANTAGES': [
             {
