@@ -18,4 +18,4 @@ Crawl-delay: 1
 User-agent: Bingbot
 Crawl-delay: 2
 
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://autoimperia-detailing.ru/sitemap.xml
