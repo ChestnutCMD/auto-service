@@ -21,7 +21,7 @@ if DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = False
 else:
     # Настройки для продакшена
-    SECURE_SSL_REDIRECT = True
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
