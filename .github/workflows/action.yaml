@@ -35,6 +35,8 @@ jobs:
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
       EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+      TELEPHONE: ${{ secrets.TELEPHONE }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

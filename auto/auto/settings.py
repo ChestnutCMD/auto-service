@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
-
+SITE_URL = os.getenv('SITE_URL')
+TELEPHONE = os.getenv('TELEPHONE')
 DEBUG = os.getenv('DEBUG', False) == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'auto.context_processors.site_settings',
             ],
         },
     },
