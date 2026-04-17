@@ -18,6 +18,7 @@ urlpatterns = [
     path('', include('attendance.urls')),
     path('', include('reservation.urls')),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path('yandex_7122adca7f080296.html', TemplateView.as_view(template_name='yandex_7122adca7f080296.html', content_type='text/html')),
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 ]
 
