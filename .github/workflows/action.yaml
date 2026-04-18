@@ -37,6 +37,7 @@ jobs:
       EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
       SITE_URL: ${{ secrets.SITE_URL }}
       TELEPHONE: ${{ secrets.TELEPHONE }}
+      NOTIFICATION_EMAIL: ${{ secrets.NOTIFICATION_EMAIL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
